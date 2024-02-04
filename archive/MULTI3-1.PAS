@@ -1,0 +1,2625 @@
+PROGRAM KUKAC;
+USES crt, graph;
+CONST max=800;
+
+VAR gd,gm,x,y,x1,y1,x2,y2,i,j,hossz,x20,x21,x22,y20,y21,y22,hossz2:integer;
+    x30,y30,x31,y31,x32,y32,hossz3,x40,y40,x41,y41,x42,y42,hossz4:integer;
+    ch,ch1,ch2,ch3,ch4,tmpch,tmpch2,tmpch3,tmpch4,num:char;
+    kukacxy,kukacxy2,kukacxy3,kukacxy4: array[1..max,1..2] of integer;
+    kajax, kajay, szin, round: integer;
+    pontok,tmppontok1,tmppontok2,tmppontok3,tmppontok4,rounds: string;
+    pontok1,pontok2,pontok3,pontok4,superx,supery: integer;
+    evett,jatekban1,jatekban2,jatekban3,jatekban4,jatekban11: boolean;
+    superevett,supermegy,etheral1,etheral2,etheral3,etheral4:boolean;
+    slow1,slow2,slow3,slow4,slow11,slow21,slow31,slow41: boolean;
+    slowall1,slowall2,slowall3,slowall4: boolean;
+    tdm,ctf,dm,etdm,redsteal1,redsteal2,bluesteal1,bluesteal2: boolean;
+    teampontok1,teampontok2: integer;
+    tmpteampontok1,tmpteampontok2: string;
+    speed,haste1,haste2,haste3,haste4,superkaja,superido:integer;
+
+PROCEDURE kezdes; forward;
+PROCEDURE palya; forward;
+PROCEDURE pont; forward;
+PROCEDURE kukac1_start; forward;
+PROCEDURE kukac2_start; forward;
+PROCEDURE kukac3_start; forward;
+PROCEDURE kukac4_start; forward;
+
+PROCEDURE vege;
+Begin
+  setcolor(black);
+  setfillstyle(1,black);
+  bar(5,55,635,475);
+  if (tdm=false) and (ctf=false) and (etdm=false) then
+  begin
+  if (pontok1=pontok2) and (pontok1=pontok3) and (pontok1=pontok4) then
+  begin
+    setcolor(7);
+    settextstyle(1,0,2);
+    outtextxy(200,200,'THERE IS NO WINNER!');
+  end;
+
+  if (pontok1>pontok2) and (pontok1>pontok3) and (pontok1>pontok4) then
+  begin
+    setcolor(yellow);
+    settextstyle(1,0,2);
+    outtextxy(200,200,'THE WINNER IS YELLOW!');
+  end;
+
+  if (pontok2>pontok1) and (pontok2>pontok3) and (pontok2>pontok4) then
+  begin
+    setcolor(lightblue);
+    settextstyle(1,0,2);
+    outtextxy(200,200,'THE WINNER IS BLUE!');
+  end;
+
+  if (pontok3>pontok1) and (pontok3>pontok2) and (pontok3>pontok4) then
+  begin
+    setcolor(Brown);
+    settextstyle(1,0,2);
+    outtextxy(200,200,'THE WINNER IS BROWN!');
+  end;
+
+  if (pontok4>pontok1) and (pontok4>pontok2) and (pontok4>pontok3) then
+  begin
+    setcolor(white);
+    settextstyle(1,0,2);
+    outtextxy(200,200,'THE WINNER IS WHITE!');
+  end;
+  end
+  else
+  begin
+    if (teampontok1>teampontok2) then
+    begin
+      setcolor(blue);
+      settextstyle(1,0,2);
+      outtextxy(150,200,'THE WINNER IS THE BLUE TEAM!');
+    end;
+
+    if (teampontok2>teampontok1) then
+    begin
+      setcolor(red);
+      settextstyle(1,0,2);
+      outtextxy(150,200,'THE WINNER IS THE RED TEAM!');
+    end;
+
+    if (teampontok1=teampontok2) or (teampontok2=teampontok1) then
+    begin
+      setcolor(7);
+      settextstyle(1,0,2);
+      outtextxy(200,200,'THERE ARE NO WINNERS');
+    end;
+  end;
+
+  settextstyle(2,0,5);
+  setcolor(7);
+  outtextxy(210,230,'PRESS ENTER TO QUIT GAME');
+
+  repeat
+    ch:=readkey;
+  until ch=#13;
+  halt;
+End;
+
+PROCEDURE eves;
+Begin
+  if ((x1=kajax)and(y1=kajay)) or ((kukacxy[2,1]=kajax)and(kukacxy[2,2]=kajay)) then
+  begin
+    hossz:=hossz+1;
+    if (tdm=true)or(etdm=true) then inc(teampontok1) else inc(pontok1);
+    if speed<=0 then speed :=1 else speed:=speed-100;
+    evett:=true;
+  end;
+
+  if ((x21=kajax)and(y21=kajay)) or ((kukacxy2[2,1]=kajax)and(kukacxy2[2,2]=kajay)) then
+  begin
+    hossz2:=hossz2+1;
+    if (tdm=true)or(etdm=true) then inc(teampontok2) else inc(pontok2);
+    if speed<=0 then speed :=1 else speed:=speed-100;
+    evett:=true;
+  end;
+
+  if ((x31=kajax)and(y31=kajay)) or ((kukacxy3[2,1]=kajax)and(kukacxy3[2,2]=kajay)) then
+  begin
+    inc(hossz3);
+    if (tdm=true)or(etdm=true) then inc(teampontok1) else inc(pontok3);
+    if speed<=0 then speed :=1 else  speed:=speed-100;
+    evett:=true;
+  end;
+
+  if ((x41=kajax)and(y41=kajay)) or ((kukacxy4[2,1]=kajax)and(kukacxy4[2,2]=kajay)) then
+  begin
+    inc(hossz4);
+    if (tdm=true)or(etdm=true) then inc(teampontok2) else inc(pontok4);
+    if speed<=0 then speed :=1  else speed:=speed-100;
+    evett:=true;
+  end;
+     {* SZUPER KAJ†K *}
+     case superkaja of
+     1 :Begin  {haste}
+          if ((x1=superx)and(y1=supery)) or ((kukacxy[2,1]=superx)and(kukacxy[2,2]=supery))  then
+          begin
+            setcolor(white);
+            outtextxy(10,40,'haste');
+            if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok1:=pontok1+3;
+            haste1:=2;
+            superevett:=true;
+            supermegy:=true;
+            superido:=40;
+            pont;
+          end;
+          if ((x21=superx)and(y21=supery)) or ((kukacxy2[2,1]=superx)and(kukacxy2[2,2]=supery)) then
+          begin
+            setcolor(white);
+            outtextxy(160,40,'haste');
+            if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok2:=pontok2+3;
+            haste2:=2;
+            superevett:=true;
+            supermegy:=true;
+            superido:=30;
+            pont;
+          end;
+          if ((x31=superx)and(y31=supery)) or ((kukacxy3[2,1]=superx)and(kukacxy3[2,2]=supery)) then
+           begin
+            setcolor(white);
+            outtextxy(310,40,'haste');
+            if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok3:=pontok3+3;
+            haste3:=2;
+            superevett:=true;
+            supermegy:=true;
+            superido:=30;
+            pont;
+          end;
+          if ((x41=superx)and(y41=supery)) or ((kukacxy4[2,1]=superx)and(kukacxy4[2,2]=supery)) then
+          begin
+            setcolor(white);
+            outtextxy(465,40,'haste');
+            if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok4:=pontok4+3;
+            superevett:=true;
+            haste4:=2;
+            supermegy:=true;
+            superido:=30;
+            pont;
+          end;
+        end;
+     2:begin  {mass haste}
+          if ((x1=superx)and(y1=supery)) or ((kukacxy[2,1]=superx)and(kukacxy[2,2]=supery)) then
+          begin
+            if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok1:=pontok1+3;
+            supermegy:=true;
+            superido:=30;
+            superevett:=true;
+            haste1:=2; haste2:=2; haste3:=2; haste4:=2;
+            setcolor(white);
+            outtextxy(10,40,'haste');outtextxy(160,40,'haste');outtextxy(310,40,'haste');outtextxy(465,40,'haste');
+            pont;
+          end;
+          if ((x21=superx)and(y21=supery)) or ((kukacxy2[2,1]=superx)and(kukacxy2[2,2]=supery)) then
+          begin
+            if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok2:=pontok2+3;
+            supermegy:=true;
+            superido:=30;
+            superevett:=true;
+            haste1:=2; haste2:=2; haste3:=2; haste4:=2;
+            setcolor(white);
+            outtextxy(10,40,'haste');outtextxy(160,40,'haste');outtextxy(310,40,'haste');outtextxy(465,40,'haste');
+            pont;
+          end;
+          if ((x31=superx)and(y31=supery)) or ((kukacxy3[2,1]=superx)and(kukacxy3[2,2]=supery)) then
+          begin
+            if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok3:=pontok3+3;
+            supermegy:=true;
+            superido:=30;
+            superevett:=true;
+            haste1:=2; haste2:=2; haste3:=2; haste4:=2;
+            setcolor(white);
+            outtextxy(10,40,'haste');outtextxy(160,40,'haste');outtextxy(310,40,'haste');outtextxy(465,40,'haste');
+            pont;
+          end;
+          if ((x41=superx)and(y41=supery)) or ((kukacxy4[2,1]=superx)and(kukacxy4[2,2]=supery)) then
+          begin
+            if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok4:=pontok4+3;
+            supermegy:=true;
+            superido:=30;
+            superevett:=true;
+            haste1:=2; haste2:=2; haste3:=2; haste4:=2;
+            setcolor(white);
+            outtextxy(10,40,'haste');outtextxy(160,40,'haste');outtextxy(310,40,'haste');outtextxy(465,40,'haste');
+            pont;
+          end;
+
+        end;
+     3:begin  {haste others}
+          if ((x1=superx)and(y1=supery)) or ((kukacxy[2,1]=superx)and(kukacxy[2,2]=supery)) then
+          begin
+            if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok1:=pontok1+3;
+            haste2:=2;haste3:=2;haste4:=2;
+            supermegy:=true;
+            superido:=30;
+            superevett:=true;
+            setcolor(white);
+            outtextxy(160,40,'haste');outtextxy(310,40,'haste');outtextxy(465,40,'haste');
+            pont;
+          end;
+          if ((x21=superx)and(y21=supery)) or ((kukacxy2[2,1]=superx)and(kukacxy2[2,2]=supery)) then
+          begin
+            if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok2:=pontok2+3;
+            haste1:=2;haste3:=2;haste4:=2;
+            supermegy:=true;
+            superido:=30;
+            superevett:=true;
+            setcolor(white);
+            outtextxy(10,40,'haste');outtextxy(310,40,'haste');outtextxy(465,40,'haste');
+            pont;
+          end;
+          if ((x31=superx)and(y31=supery)) or ((kukacxy3[2,1]=superx)and(kukacxy3[2,2]=supery)) then
+          begin
+            if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok3:=pontok3+3;
+            haste1:=2;haste2:=2;haste4:=2;
+            supermegy:=true;
+            superido:=30;
+            superevett:=true;
+            setcolor(white);
+            outtextxy(10,40,'haste');outtextxy(160,40,'haste');outtextxy(465,40,'haste');
+            pont;
+          end;
+          if ((x41=superx)and(y41=supery)) or ((kukacxy4[2,1]=superx)and(kukacxy4[2,2]=supery)) then
+          begin
+            if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok4:=pontok4+3;
+            haste1:=2;haste2:=2;haste3:=2;
+            supermegy:=true;
+            superido:=30;
+            superevett:=true;
+            setcolor(white);
+            outtextxy(10,40,'haste');outtextxy(160,40,'haste');outtextxy(310,40,'haste');
+            pont;
+          end;
+        end;
+     4..5:begin  {growing}
+         if ((x1=superx)and(y1=supery)) or ((kukacxy[2,1]=superx)and(kukacxy[2,2]=supery)) then
+         begin
+           hossz :=hossz +15;
+           if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok1:=pontok1+3;
+           superevett:=true;
+           pont;
+         end;
+         if ((x21=superx)and(y21=supery)) or ((kukacxy2[2,1]=superx)and(kukacxy2[2,2]=supery)) then
+         begin
+           hossz2:=hossz2+15;
+           if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok2:=pontok2+3;
+           superevett:=true;
+           pont;
+         end;
+         if ((x31=superx)and(y31=supery)) or ((kukacxy3[2,1]=superx)and(kukacxy3[2,2]=supery)) then
+         begin
+           hossz3:=hossz3+15;
+           if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok3:=pontok3+3;
+           superevett:=true;
+           pont;
+         end;
+         if ((x41=superx)and(y41=supery)) or ((kukacxy4[2,1]=superx)and(kukacxy4[2,2]=supery)) then
+         begin
+           hossz4:=hossz4+15;
+           if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok4:=pontok4+3;
+           superevett:=true;
+           pont;
+         end;
+       end;
+      6:begin {etheral}
+         if ((x1=superx)and(y1=supery)) or ((kukacxy[2,1]=superx)and(kukacxy[2,2]=supery)) then
+         begin
+           etheral1:=true;
+           if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok1:=pontok1+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=120;
+           setcolor(white);
+           outtextxy(10,40,'etheral');
+           pont;
+         end;
+         if ((x21=superx)and(y21=supery)) or ((kukacxy2[2,1]=superx)and(kukacxy2[2,2]=supery)) then
+         begin
+           etheral2:=true;
+           if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok2:=pontok2+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=120;
+           setcolor(white);
+           outtextxy(160,40,'etheral');
+           pont;
+         end;
+         if ((x31=superx)and(y31=supery)) or ((kukacxy3[2,1]=superx)and(kukacxy3[2,2]=supery)) then
+         begin
+           etheral3:=true;
+           if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok3:=pontok3+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=120;
+           setcolor(white);
+           outtextxy(310,40,'etheral');
+           pont;
+         end;
+         if ((x41=superx)and(y41=supery)) or ((kukacxy4[2,1]=superx)and(kukacxy4[2,2]=supery)) then
+         begin
+           etheral4:=true;
+           if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok4:=pontok4+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=120;
+           setcolor(white);
+           outtextxy(465,40,'etheral');
+           pont;
+         end;
+         end;
+     7: begin  {slow}
+         if ((x1=superx)and(y1=supery)) or ((kukacxy[2,1]=superx)and(kukacxy[2,2]=supery)) then
+         begin
+           slow11:=true;
+           if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok1:=pontok1+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=60;
+           setcolor(white);
+           outtextxy(10,40,'slow');
+           pont;
+         end;
+         if ((x21=superx)and(y21=supery)) or ((kukacxy2[2,1]=superx)and(kukacxy2[2,2]=supery)) then
+         begin
+           slow21:=true;
+           if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok2:=pontok2+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=60;
+           setcolor(white);
+           outtextxy(160,40,'slow');
+           pont;
+         end;
+         if ((x31=superx)and(y31=supery)) or ((kukacxy3[2,1]=superx)and(kukacxy3[2,2]=supery)) then
+         begin
+           slow31:=true;
+           if tdm=true then teampontok1:=teampontok1+3 else pontok3:=pontok3+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=60;
+           setcolor(white);
+           outtextxy(310,40,'slow');
+           pont;
+         end;
+         if ((x41=superx)and(y41=supery)) or ((kukacxy4[2,1]=superx)and(kukacxy4[2,2]=supery)) then
+         begin
+           slow41:=true;
+           if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok4:=pontok4+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=60;
+           setcolor(white);
+           outtextxy(465,40,'slow');
+           pont;
+         end;
+        end;
+     8: begin {slow others (bullet time)}
+         if ((x1=superx)and(y1=supery)) or ((kukacxy[2,1]=superx)and(kukacxy[2,2]=supery)) then
+         begin
+           slowall1:=true;
+           if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok1:=pontok1+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=100;
+           setcolor(white);
+           outtextxy(10,40,'bullet time');
+           pont;
+         end;
+         if ((x21=superx)and(y21=supery)) or ((kukacxy2[2,1]=superx)and(kukacxy2[2,2]=supery)) then
+         begin
+           slowall2:=true;
+           if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok2:=pontok2+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=100;
+           setcolor(white);
+           outtextxy(160,40,'bullet time');
+           pont;
+         end;
+         if ((x31=superx)and(y31=supery)) or ((kukacxy3[2,1]=superx)and(kukacxy3[2,2]=supery)) then
+         begin
+           slowall3:=true;
+           if (tdm=true)or(etdm=true) then teampontok1:=teampontok1+3 else pontok3:=pontok3+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=100;
+           setcolor(white);
+           outtextxy(310,40,'bullet time');
+           pont;
+         end;
+         if ((x41=superx)and(y41=supery)) or ((kukacxy4[2,1]=superx)and(kukacxy4[2,2]=supery)) then
+         begin
+           slowall4:=true;
+           if (tdm=true)or(etdm=true) then teampontok2:=teampontok2+3 else pontok4:=pontok4+3;
+           superevett:=true;
+           supermegy:=true;
+           superido:=100;
+           setcolor(white);
+           outtextxy(465,40,'bullet time');
+           pont;
+         end;
+        end;
+     9..30:begin {semmi}
+            superevett:=true;
+           end;
+     end;
+End;
+
+PROCEDURE steal;
+Begin
+  if (bluesteal2=false) and (((x1=500)and(y1=220)) or ((kukacxy[2,1]=500)and(kukacxy[2,2]=220))) then
+  begin
+    bluesteal1:=true;
+  end;
+
+  if (bluesteal1=false) and (((x31=500)and(y31=220)) or ((kukacxy3[2,1]=500)and(kukacxy3[2,2]=220))) then
+  begin
+    bluesteal2:=true;
+  end;
+
+   if (redsteal2=false) and (((x21=120)and(y21=220)) or ((kukacxy2[2,1]=120)and(kukacxy2[2,2]=220))) then
+   begin
+     redsteal1:=true;
+   end;
+
+   if (redsteal1=false) and (((x41=120)and(y41=220)) or ((kukacxy4[2,1]=120)and(kukacxy4[2,2]=220))) then
+   begin
+     redsteal2:=true;
+   end;
+
+   if ((bluesteal1=true) and ((redsteal1=false)and(redsteal2=false))) and
+      (((x1=120)and(y1=220)) or ((kukacxy[2,1]=120)and(kukacxy[2,2]=220))) then
+   begin
+     inc(teampontok1);
+     bluesteal1:=false;
+     pont;
+   end;
+
+   if ((bluesteal2=true) and ((redsteal1=false)and(redsteal2=false))) and
+      (((x31=120)and(y31=220)) or ((kukacxy3[2,1]=120)and(kukacxy3[2,2]=220))) then
+   begin
+     inc(teampontok1);
+     bluesteal2:=false;
+     pont;
+   end;
+
+   if ((redsteal1=true) and ((bluesteal1=false)and(bluesteal2=false))) and
+      (((x21=500)and(y21=220)) or ((kukacxy2[2,1]=500)and(kukacxy2[2,2]=220))) then
+   begin
+     inc(teampontok2);
+     redsteal1:=false;
+     pont;
+   end;
+
+   if ((redsteal2=true) and ((bluesteal1=false)and(bluesteal2=false))) and
+      (((x41=500)and(y41=220)) or ((kukacxy4[2,1]=500)and(kukacxy4[2,2]=220))) then
+   begin
+     inc(teampontok2);
+     redsteal2:=false;
+     pont;
+   end;
+End;
+
+PROCEDURE kaja;
+Begin
+  if evett=true then
+  begin
+     RANDOMIZE;
+     kajax:=10*(random(62))+10;
+     kajay:=10*(random(42))+60;
+
+     {ne lehessen a kigyokon a kaja!!!}
+     for i:=1 to hossz do
+      if (kukacxy[i,1]=kajax) and (kukacxy[i,2]=kajay) then
+      begin
+        kajax:=10*(random(62))+10;
+        kajay:=10*(random(42))+60;
+      end;
+
+     for i:=1 to hossz2 do
+     if (kukacxy2[i,1]=kajax) and (kukacxy2[i,2]=kajay) then
+      begin
+        kajax:=10*(random(62))+10;
+        kajay:=10*(random(42))+60;
+      end;
+
+     for i:=1 to hossz3 do
+     if (kukacxy3[i,1]=kajax) and (kukacxy3[i,2]=kajay) then
+      begin
+        kajax:=10*(random(62))+10;
+        kajay:=10*(random(42))+60;
+      end;
+
+     for i:=1 to hossz4 do
+     if (kukacxy4[i,1]=kajax) and (kukacxy4[i,2]=kajay) then
+      begin
+        kajax:=10*(random(62))+10;
+        kajay:=10*(random(42))+60;
+      end;
+
+   if (superevett=true) then
+   begin
+     superkaja:=random(30)+1;
+     superx:=10 * (random(62))+10;
+     supery:=10 * (random(42))+60;
+
+     for i:=1 to hossz do
+       if (kukacxy[i,1]=superx) and (kukacxy[i,2]=supery) then
+       begin
+         superx:=10 * (random(62))+10;
+         supery:=10 * (random(42))+60;
+       end;
+     for i:=1 to hossz2 do
+       if (kukacxy2[i,1]=superx) and (kukacxy2[i,2]=supery) then
+       begin
+         superx:=10 * (random(62))+10;
+         supery:=10 * (random(42))+60;
+       end;
+
+     for i:=1 to hossz3 do
+       if (kukacxy3[i,1]=superx) and (kukacxy3[i,2]=supery) then
+       begin
+         superx:=10 * (random(62))+10;
+         supery:=10 * (random(42))+60;
+       end;
+
+     for i:=1 to hossz4 do
+      if (kukacxy4[i,1]=superx) and (kukacxy4[i,2]=supery) then
+      begin
+         superx:=10 * (random(62))+10;
+         supery:=10 * (random(42))+60;
+       end;
+  end;
+     {kiarjzol}
+     repeat
+       szin:=(random(15)+1);
+     until (szin>0) and (szin<16);
+     setcolor(szin);
+     setfillstyle(random(15)+1,szin);
+     pieslice(kajax,kajay,0,360,4);
+     evett:=false;
+
+     if (superkaja>0) and (superkaja<9) then
+     begin
+       setfillstyle(6,red);
+       bar(superx-3,supery-3,superx+3,supery+3);
+     end;
+     superevett:=false;
+     pont;
+   end;
+
+End;
+
+PROCEDURE flags;
+Begin
+  if (redsteal1=false)and(redsteal2=false) then   {blue flag}
+  begin
+    setcolor(blue);
+    setfillstyle(1,blue);
+    pieslice(120,220,0,360,4);
+  end;
+  if (bluesteal1=false)and(bluesteal2=false) then  {red flag}
+  begin
+    setcolor(red);
+    setfillstyle(1,red);
+    pieslice(500,220,0,360,4);
+  end;
+End;
+
+PROCEDURE draw;
+Begin
+  if (jatekban11=true) then
+  begin
+    setcolor(red);
+    settextstyle(1,0,1);
+    outtextxy(295,210,'BOOM');
+    settextstyle(0,0,1);
+    outtextxy(210,235,'Press "Enter" to continoue');
+    ch:=readkey;
+    if ch=#13 then kezdes;
+    if ch=#27 then vege else draw;
+  end
+  else
+  if ctf=true then
+  begin
+     setcolor(black);
+     setfillstyle(1,black);
+     for i:=1 to hossz do
+     begin
+       pieslice(kukacxy[i,1],kukacxy[i,2],0,360,4);
+     end;
+
+     for i:=1 to hossz2 do
+     begin
+       pieslice(kukacxy2[i,1],kukacxy2[i,2],0,360,4);
+     end;
+
+     for i:=1 to hossz3 do
+     begin
+       pieslice(kukacxy3[i,1],kukacxy3[i,2],0,360,4);
+     end;
+
+     for i:=1 to hossz4 do
+     begin
+       pieslice(kukacxy4[i,1],kukacxy4[i,2],0,360,4);
+     end;
+
+    kukac1_start;
+    kukac2_start;
+    kukac3_start;
+    kukac4_start;
+  end
+  else
+  begin
+    setcolor(red);
+    settextstyle(1,0,1);
+    outtextxy(295,210,'DRAW');
+    settextstyle(0,0,1);
+    outtextxy(210,235,'Press "Enter" to continoue');
+    ch:=readkey;
+    if ch=#13 then kezdes;
+    if ch=#27 then vege else draw;
+  end;
+End;
+
+PROCEDURE pont;
+
+Begin
+  settextstyle(0,0,1);
+
+ if (tdm=true) or (ctf=true) or (etdm=true) then
+ begin
+  {kigyo1}
+  if (jatekban1=false)and(ctf=false)and(etdm=false) then
+  begin
+    setcolor(7);
+    outtextxy(80,30,'OUT');
+  end;
+  begin
+    setcolor(8);
+    outtextxy(120,20,tmpteampontok1+' points');
+    setcolor(red);
+    str(teampontok1,pontok);
+    outtextxy(120,20,pontok+' points');
+    tmpteampontok1:=pontok;
+  end;
+
+  {kigyo2}
+  if (jatekban2=false)and(ctf=false)and(etdm=false) then
+  begin
+    setcolor(7);
+    outtextxy(400,30,'OUT');
+  end;
+  begin
+    setcolor(8);
+    outtextxy(440,20,tmpteampontok2+' points');
+    setcolor(blue);
+    str(teampontok2,pontok);
+    outtextxy(440,20,pontok+' points');
+    tmpteampontok2:=pontok;
+  end;
+
+  {kigyo3}
+  if (jatekban3=false)and(ctf=false)and(etdm=false) then
+  begin
+    setcolor(7);
+    outtextxy(200,30,'OUT');
+  end;
+  begin
+    setcolor(8);
+    outtextxy(120,20,tmpteampontok1+' points');
+    setcolor(blue);
+    str(teampontok1,pontok);
+    outtextxy(120,20,pontok+' points');
+    tmpteampontok1:=pontok;
+  end;
+
+  {kigyo4}
+  if (jatekban4=false)and(ctf=false)and(etdm=false) then
+  begin
+    setcolor(7);
+    outtextxy(520,30,'OUT');
+  end;
+  begin
+    setcolor(8);
+    outtextxy(440,20,tmpteampontok2+' points');
+    setcolor(red);
+    str(teampontok2,pontok);
+    outtextxy(440,20,pontok+' points');
+    tmpteampontok2:=pontok;
+  end;
+ end
+ else
+ begin
+  {kigyo1}
+  if (jatekban1=false)and(dm=false) then
+  begin
+    setcolor(red);
+    outtextxy(10,20,'OUT');
+  end;
+  begin
+    setcolor(8);
+    outtextxy(10,10,tmppontok1+' points');
+    setcolor(yellow);
+    str(pontok1,pontok);
+    outtextxy(10,10,pontok+' points');
+    tmppontok1:=pontok;
+  end;
+
+  {kigyo2}
+  if (jatekban2=false)and((dm=false)or(num<'2')) then
+  begin
+    setcolor(red);
+    outtextxy(160,20,'OUT');
+  end;
+  begin
+    setcolor(8);
+    outtextxy(160,10,tmppontok2+' points');
+    setcolor(lightblue);
+    str(pontok2,pontok);
+    outtextxy(160,10,pontok+' points');
+    tmppontok2:=pontok;
+  end;
+
+  {kigyo3}
+  if (jatekban3=false)and((dm=false)or(num<'3')) then
+  begin
+    setcolor(red);
+    outtextxy(310,20,'OUT');
+  end;
+  begin
+    setcolor(8);
+    outtextxy(310,10,tmppontok3+' points');
+    setcolor(brown);
+    str(pontok3,pontok);
+    outtextxy(310,10,pontok+' points');
+    tmppontok3:=pontok;
+  end;
+
+  {kigyo4}
+  if (jatekban4=false)and((dm=false)or(num<'4')) then
+  begin
+    setcolor(red);
+    outtextxy(465,20,'OUT');
+  end;
+  begin
+    setcolor(8);
+    outtextxy(465,10,tmppontok4+' points');
+    setcolor(white);
+    str(pontok4,pontok);
+    outtextxy(465,10,pontok+' points');
+    tmppontok4:=pontok;
+  end;
+ end;
+
+End;
+
+PROCEDURE nyer1;
+Begin
+  if (tdm=false) and (ctf=false) and (etdm=false) then
+  begin
+  pontok1:=pontok1+5;
+  setfillstyle(1,8);
+  bar(10,38,100,48); bar(160,38,250,48); bar(310,38,400,48); bar(465,38,555,48);
+  setcolor(yellow);
+  settextstyle(0,0,1);
+  outtextxy(10,30,'yellow');
+  setcolor(green);
+  outtextxy(10,40,'won this round');
+  pont;
+  repeat
+    ch:=readkey;
+  until (ch=#13) or (ch=#27);
+  if ch=#13 then kezdes;
+  if ch=#27 then vege;
+  end;
+End;
+
+PROCEDURE nyer2;
+Begin
+  if (tdm=false) and (ctf=false) and (etdm=false) then
+  begin
+  pontok2:=pontok2+5;
+  setfillstyle(1,8);
+  bar(10,38,100,48); bar(160,38,250,48); bar(310,38,400,48); bar(465,38,555,48);
+  setcolor(lightblue);
+  settextstyle(0,0,1);
+  outtextxy(160,30,'blue');
+  setcolor(green);
+  outtextxy(160,40,'won this round');
+  pont;
+  repeat
+    ch:=readkey;
+  until (ch=#13) or (ch=#27);
+  if ch=#13 then kezdes;
+  if ch=#27 then vege;
+  end;
+End;
+
+PROCEDURE nyer3;
+Begin
+  if (tdm=false) and (ctf=false) and (etdm=false) then
+  begin
+  setfillstyle(1,8);
+  bar(10,38,100,48); bar(160,38,250,48); bar(310,38,400,48); bar(465,38,555,48);
+  pontok3:=pontok3+5;
+  setcolor(brown);
+  settextstyle(0,0,1);
+  outtextxy(310,30,'brown');
+  setcolor(green);
+  outtextxy(310,40,'won this round');
+  pont;
+  repeat
+    ch:=readkey;
+  until (ch=#13) or (ch=#27);
+  if ch=#13 then kezdes;
+  if ch=#27 then vege;
+  end;
+End;
+
+PROCEDURE nyer4;
+Begin
+  if (tdm=false) and (ctf=false) then
+  begin
+  setfillstyle(1,8);
+  bar(10,38,100,48); bar(160,38,250,48); bar(310,38,400,48); bar(465,38,555,48);
+  pontok4:=pontok4+5;
+  setcolor(white);
+  settextstyle(0,0,1);
+  outtextxy(465,30,'white');
+  setcolor(green);
+  outtextxy(465,40,'won this round');
+  pont;
+  repeat
+    ch:=readkey;
+  until (ch=#13) or (ch=#27);
+  if ch=#13 then kezdes;
+  if ch=#27 then vege;
+  end;
+End;
+
+PROCEDURE teamnyer1;
+Begin
+  if ctf=false then teampontok1:=teampontok1+5;
+  setfillstyle(1,8);
+  bar(10,38,100,48); bar(160,38,250,48); bar(310,38,400,48); bar(465,38,555,48);
+  setcolor(blue);
+  settextstyle(0,0,1);
+  outtextxy(60,40,'blue team won this round');
+  pont;
+  repeat
+    ch:=readkey;
+  until (ch=#13) or (ch=#27);
+  if ch=#13 then kezdes;
+  if ch=#27 then vege;
+End;
+
+PROCEDURE teamnyer2;
+Begin
+  if ctf=false then teampontok2:=teampontok2+5;
+  setfillstyle(1,8);
+  bar(10,38,100,48); bar(160,38,250,48); bar(310,38,400,48); bar(465,38,555,48);
+  setcolor(red);
+  settextstyle(0,0,1);
+  outtextxy(380,40,'red team won this round');
+  pont;
+  repeat
+    ch:=readkey;
+  until (ch=#13) or (ch=#27);
+  if ch=#13 then kezdes;
+  if ch=#27 then vege;
+End;
+
+PROCEDURE irany;
+Begin
+   if jatekban1=false then
+   begin
+     setcolor(black);
+     setfillstyle(1,black);
+     for i:=1 to hossz do
+     begin
+       pieslice(kukacxy[i,1],kukacxy[i,2],0,360,4);
+       kukacxy[i,1]:=0;
+       kukacxy[i,2]:=0;
+     end;
+     if (ctf=true)or(dm=true)or(etdm=true) then kukac1_start;
+   end
+   else
+   if slow1=false then
+   begin
+   for j:=1 to haste1 do
+   case ch1 of
+     #72{fel }:begin
+               if (y1<=65) or
+                  ((ctf=true)and(x1>=95)and(x1<=130)and(y1>=205)and(y1<=210)) or
+                  ((ctf=true)and(x1>=95)and(x1<=135)and(y1<=250)and(y1>=240)) or
+                  ((ctf=true)and(x1>=490)and(x1<=525)and(y1>=205)and(y1<=210))or
+                  ((ctf=true)and(x1>=490)and(x1<=525)and(y1<=250)and(y1>=240)) then
+               begin
+                 jatekban1:=false;
+               end
+               else
+               begin
+                setcolor(yellow);
+                setfillstyle(1,yellow);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x1,y1,0,360,4);
+                y1:=y1-10;
+                x2:=kukacxy[hossz,1];
+                y2:=kukacxy[hossz,2];
+
+                for i:=hossz downto 2 do
+                begin
+                  kukacxy[i,1]:=kukacxy[i-1,1];
+                  kukacxy[i,2]:=kukacxy[i-1,2];
+                end;
+
+                kukacxy[1,1]:=x1;
+                kukacxy[1,2]:=y1;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if bluesteal1=true then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x1,y1,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x2,y2,0,360,4);
+
+               end;
+               end;
+
+     #80{le  }:begin
+               if (y1>=465) or
+                  ((ctf=true)and(x1>=95)and(x1<=130)and(y1>=190)and(y1<=195)) or
+                  ((ctf=true)and(x1>=95)and(x1<=135)and(y1<=235)and(y1>=225)) or
+                  ((ctf=true)and(x1>=490)and(x1<=525)and(y1>=190)and(y1<=195))or
+                  ((ctf=true)and(x1>=490)and(x1<=525)and(y1<=235)and(y1>=225)) then
+               begin
+                 jatekban1:=false;
+               end
+               else
+               begin
+                setcolor(yellow);
+                setfillstyle(1,yellow);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x1,y1,0,360,4);
+                y1:=y1+10;
+                x2:=kukacxy[hossz,1];
+                y2:=kukacxy[hossz,2];
+
+                for i:=hossz downto 2 do
+                begin
+                  kukacxy[i,1]:=kukacxy[i-1,1];
+                  kukacxy[i,2]:=kukacxy[i-1,2];
+                end;
+
+                kukacxy[1,1]:=x1;
+                kukacxy[1,2]:=y1;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if bluesteal1=true then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x1,y1,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x2,y2,0,360,4);
+
+               end;
+               end;
+
+     #75{bal }:begin
+               if (x1<=15) or
+                  ((ctf=true)and(x1>=130)and(x1<=140)and(y1>=200)and(y1<=245)) or
+                  ((ctf=true)and(x1>=495)and(x1<=505)and(y1>=200)and(y1<=245)) or
+                  ((ctf=true)and(x1>=495)and(x1<=530)and(y1<=245)and(y1>=235)) or
+                  ((ctf=true)and(x1>=495)and(x1<=530)and(y1<=205)and(y1>=195)) then
+               begin
+                jatekban1:=false;
+               end
+               else
+               begin
+                setcolor(yellow);
+                setfillstyle(1,yellow);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x1,y1,0,360,4);
+                x1:=x1-10;
+                x2:=kukacxy[hossz,1];
+                y2:=kukacxy[hossz,2];
+
+                for i:=hossz downto 2 do
+                begin
+                  kukacxy[i,1]:=kukacxy[i-1,1];
+                  kukacxy[i,2]:=kukacxy[i-1,2];
+                end;
+
+                kukacxy[1,1]:=x1;
+                kukacxy[1,2]:=y1;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if bluesteal1=true then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x1,y1,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x2,y2,0,360,4);
+
+               end;
+               end;
+
+     #77{jobb}:begin
+               if (x1>=625) or
+                  ((ctf=true)and(x1>=120)and(x1<=130)and(y1>=200)and(y1<=245)) or
+                  ((ctf=true)and(x1>=480)and(x1<=490)and(y1>=200)and(y1<=245)) or
+                  ((ctf=true)and(x1>=85)and(x1<=130)and(y1<=245)and(y1>=235)) or
+                  ((ctf=true)and(x1>=85)and(x1<=130)and(y1<=205)and(y1>=195)) then
+               begin
+                jatekban1:=false;
+               end
+               else
+               begin
+                setcolor(yellow);
+                setfillstyle(1,yellow);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x1,y1,0,360,4);
+                x1:=x1+10;
+                x2:=kukacxy[hossz,1];
+                y2:=kukacxy[hossz,2];
+
+                for i:=hossz downto 2 do
+                begin
+                  kukacxy[i,1]:=kukacxy[i-1,1];
+                  kukacxy[i,2]:=kukacxy[i-1,2];
+                end;
+
+                kukacxy[1,1]:=x1;
+                kukacxy[1,2]:=y1;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if bluesteal1=true then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x1,y1,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x2,y2,0,360,4);
+
+               end;
+               end;
+      end;
+   end;
+
+   if jatekban2=false then
+   begin
+     setcolor(black);
+     setfillstyle(1,black);
+     for i:=1 to hossz2 do
+     begin
+       pieslice(kukacxy2[i,1],kukacxy2[i,2],0,360,4);
+       kukacxy2[i,1]:=0;
+       kukacxy2[i,2]:=0;
+     end;
+     if (ctf=true)or(dm=true)or(etdm=true) then kukac2_start;
+   end
+   else
+   if slow2=false then
+   for j:=1 to haste2 do
+      case ch2 of
+     'w'{fel }:begin
+                if (y21<=65) or
+                  ((ctf=true)and(x21>=95)and(x21<=130)and(y21>=205)and(y21<=210)) or
+                  ((ctf=true)and(x21>=95)and(x21<=135)and(y21<=250)and(y21>=240)) or
+                  ((ctf=true)and(x21>=490)and(x21<=525)and(y21>=205)and(y21<=210))or
+                  ((ctf=true)and(x21>=490)and(x21<=525)and(y21<=250)and(y21>=240)) then
+                begin
+                 jatekban2:=false;
+                end
+                else
+                begin
+                setcolor(lightblue);
+                setfillstyle(1,lightblue);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x21,y21,0,360,4);
+                y21:=y21-10;
+                x22:=kukacxy2[hossz2,1];
+                y22:=kukacxy2[hossz2,2];
+
+                for i:=hossz2 downto 2 do
+                begin
+                  kukacxy2[i,1]:=kukacxy2[i-1,1];
+                  kukacxy2[i,2]:=kukacxy2[i-1,2];
+                end;
+
+                kukacxy2[1,1]:=x21;
+                kukacxy2[1,2]:=y21;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if redsteal1=true then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x21,y21,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x22,y22,0,360,4);
+               end;
+               end;
+
+
+     's'{le  }:begin
+               if (y21>=465) or
+                  ((ctf=true)and(x21>=95)and(x21<=130)and(y21>=190)and(y21<=195)) or
+                  ((ctf=true)and(x21>=95)and(x21<=135)and(y21<=235)and(y21>=225)) or
+                  ((ctf=true)and(x21>=490)and(x21<=525)and(y21>=190)and(y21<=195))or
+                  ((ctf=true)and(x21>=490)and(x21<=525)and(y21<=235)and(y21>=225)) then
+               begin
+                jatekban2:=false;
+               end
+               else
+               begin
+                setcolor(lightblue);
+                setfillstyle(1,lightblue);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x21,y21,0,360,4);
+                y21:=y21+10;
+                x22:=kukacxy2[hossz2,1];
+                y22:=kukacxy2[hossz2,2];
+
+                for i:=hossz2 downto 2 do
+                begin
+                  kukacxy2[i,1]:=kukacxy2[i-1,1];
+                  kukacxy2[i,2]:=kukacxy2[i-1,2];
+                end;
+
+                kukacxy2[1,1]:=x21;
+                kukacxy2[1,2]:=y21;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if redsteal1=true then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x21,y21,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x22,y22,0,360,4);
+               end;
+               end;
+
+     'a'{bal }:begin
+               if (x21<=15) or
+                  ((ctf=true)and(x21>=130)and(x21<=140)and(y21>=200)and(y21<=245)) or
+                  ((ctf=true)and(x21>=495)and(x21<=505)and(y21>=200)and(y21<=245)) or
+                  ((ctf=true)and(x21>=495)and(x21<=530)and(y21<=245)and(y21>=235)) or
+                  ((ctf=true)and(x21>=495)and(x21<=530)and(y21<=205)and(y21>=195)) then
+               begin
+                jatekban2:=false;
+               end
+               else
+               begin
+                setcolor(lightblue);
+                setfillstyle(1,lightblue);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x21,y21,0,360,4);
+                x21:=x21-10;
+                x22:=kukacxy2[hossz2,1];
+                y22:=kukacxy2[hossz2,2];
+
+                for i:=hossz2 downto 2 do
+                begin
+                  kukacxy2[i,1]:=kukacxy2[i-1,1];
+                  kukacxy2[i,2]:=kukacxy2[i-1,2];
+                end;
+
+                kukacxy2[1,1]:=x21;
+                kukacxy2[1,2]:=y21;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if redsteal1=true then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x21,y21,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x22,y22,0,360,4);
+               end;
+               end;
+
+     'd'{jobb}:begin
+               if (x21>=625) or
+                  ((ctf=true)and(x21>=120)and(x21<=130)and(y21>=200)and(y21<=245)) or
+                  ((ctf=true)and(x21>=480)and(x21<=490)and(y21>=200)and(y21<=245)) or
+                  ((ctf=true)and(x21>=85)and(x21<=130)and(y21<=245)and(y21>=235)) or
+                  ((ctf=true)and(x21>=85)and(x21<=130)and(y21<=205)and(y21>=195)) then
+               begin
+                jatekban2:=false;
+               end
+               else
+               begin
+                setcolor(lightblue);
+                setfillstyle(1,lightblue);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x21,y21,0,360,4);
+                x21:=x21+10;
+                x22:=kukacxy2[hossz2,1];
+                y22:=kukacxy2[hossz2,2];
+
+                for i:=hossz2 downto 2 do
+                begin
+                  kukacxy2[i,1]:=kukacxy2[i-1,1];
+                  kukacxy2[i,2]:=kukacxy2[i-1,2];
+                end;
+
+                kukacxy2[1,1]:=x21;
+                kukacxy2[1,2]:=y21;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if redsteal1=true then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x21,y21,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x22,y22,0,360,4);
+               end;
+               end;
+     end;
+
+   if jatekban3=false then
+   begin
+     setcolor(black);
+     setfillstyle(1,black);
+     for i:=1 to hossz3 do
+     begin
+       pieslice(kukacxy3[i,1],kukacxy3[i,2],0,360,4);
+       kukacxy3[i,1]:=0;
+       kukacxy3[i,2]:=0;
+     end;
+     if (ctf=true)or(dm=true)or(etdm=true) then kukac3_start;
+   end
+   else
+   if slow3=false then
+   for j:=1 to haste3 do
+     case ch3 of
+     'i'{fel }:begin
+               if (y31<=65) or
+                  ((ctf=true)and(x31>=95)and(x31<=130)and(y31>=205)and(y31<=210)) or
+                  ((ctf=true)and(x31>=95)and(x31<=135)and(y31<=250)and(y31>=240)) or
+                  ((ctf=true)and(x31>=490)and(x31<=525)and(y31>=205)and(y31<=210))or
+                  ((ctf=true)and(x31>=490)and(x31<=525)and(y31<=250)and(y31>=240)) then
+               begin
+                jatekban3:=false;
+               end
+               else
+               begin
+                setcolor(brown);
+                setfillstyle(1,brown);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x31,y31,0,360,4);
+                y31:=y31-10;
+                x32:=kukacxy3[hossz3,1];
+                y32:=kukacxy3[hossz3,2];
+
+                for i:=hossz3 downto 2 do
+                begin
+                  kukacxy3[i,1]:=kukacxy3[i-1,1];
+                  kukacxy3[i,2]:=kukacxy3[i-1,2];
+                end;
+
+                kukacxy3[1,1]:=x31;
+                kukacxy3[1,2]:=y31;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(lightgreen);
+                  setfillstyle(1,lightgreen);
+                end;
+                if bluesteal2=true then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x31,y31,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x32,y32,0,360,4);
+
+               end;
+               end;
+
+
+     'k'{le  }:begin
+               if (y31>=465)or
+                  ((ctf=true)and(x31>=95)and(x31<=130)and(y31>=190)and(y31<=195)) or
+                  ((ctf=true)and(x31>=95)and(x31<=135)and(y31<=235)and(y31>=225)) or
+                  ((ctf=true)and(x31>=490)and(x31<=525)and(y31>=190)and(y31<=195))or
+                  ((ctf=true)and(x31>=490)and(x31<=525)and(y31<=235)and(y31>=225)) then
+               begin
+                jatekban3:=false;
+               end
+               else
+               begin
+                setcolor(brown);
+                setfillstyle(1,brown);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x31,y31,0,360,4);
+                y31:=y31+10;
+                x32:=kukacxy3[hossz3,1];
+                y32:=kukacxy3[hossz3,2];
+
+                for i:=hossz3 downto 2 do
+                begin
+                  kukacxy3[i,1]:=kukacxy3[i-1,1];
+                  kukacxy3[i,2]:=kukacxy3[i-1,2];
+                end;
+
+                kukacxy3[1,1]:=x31;
+                kukacxy3[1,2]:=y31;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(lightgreen);
+                  setfillstyle(1,lightgreen);
+                end;
+                if bluesteal2=true then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x31,y31,0,360,4);
+
+                for i:=1 to hossz3 do
+                begin
+                  if (kukacxy3[hossz3,1] and kukacxy3[hossz3,2])<>(kukacxy3[i,1] and kukacxy3[i,2])then
+                  begin
+                    setcolor(black);
+                    setfillstyle(1,black);
+                    pieslice(x2,y2,0,360,4);
+                  end;
+                end;
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x32,y32,0,360,4);
+
+               end;
+               end;
+
+     'j'{bal }:begin
+               if (x31<=15) or
+                  ((ctf=true)and(x31>=130)and(x31<=140)and(y31>=200)and(y31<=245)) or
+                  ((ctf=true)and(x31>=495)and(x31<=505)and(y31>=200)and(y31<=245)) or
+                  ((ctf=true)and(x31>=495)and(x31<=530)and(y31<=245)and(y31>=235)) or
+                  ((ctf=true)and(x31>=495)and(x31<=530)and(y31<=205)and(y31>=195)) then
+               begin
+                jatekban3:=false;
+               end
+               else
+               begin
+                setcolor(brown);
+                setfillstyle(1,brown);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x31,y31,0,360,4);
+                x31:=x31-10;
+                x32:=kukacxy3[hossz3,1];
+                y32:=kukacxy3[hossz3,2];
+
+                for i:=hossz3 downto 2 do
+                begin
+                  kukacxy3[i,1]:=kukacxy3[i-1,1];
+                  kukacxy3[i,2]:=kukacxy3[i-1,2];
+                end;
+
+                kukacxy3[1,1]:=x31;
+                kukacxy3[1,2]:=y31;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(lightgreen);
+                  setfillstyle(1,lightgreen);
+                end;
+                if bluesteal2=true then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x31,y31,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x32,y32,0,360,4);
+
+               end;
+               end;
+
+     'l'{jobb}:begin
+               if (x31>=625) or
+                  ((ctf=true)and(x31>=120)and(x31<=130)and(y31>=200)and(y31<=245)) or
+                  ((ctf=true)and(x31>=480)and(x31<=490)and(y31>=200)and(y31<=245)) or
+                  ((ctf=true)and(x31>=85)and(x31<=130)and(y31<=245)and(y31>=235)) or
+                  ((ctf=true)and(x31>=85)and(x31<=130)and(y31<=205)and(y31>=195)) then
+               begin
+                jatekban3:=false;
+               end
+               else
+               begin
+                setcolor(brown);
+                setfillstyle(1,brown);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x31,y31,0,360,4);
+                x31:=x31+10;
+                x32:=kukacxy3[hossz3,1];
+                y32:=kukacxy3[hossz3,2];
+
+                for i:=hossz3 downto 2 do
+                begin
+                  kukacxy3[i,1]:=kukacxy3[i-1,1];
+                  kukacxy3[i,2]:=kukacxy3[i-1,2];
+                end;
+
+                kukacxy3[1,1]:=x31;
+                kukacxy3[1,2]:=y31;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(lightgreen);
+                  setfillstyle(1,lightgreen);
+                end;
+                if bluesteal2=true then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x31,y31,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x32,y32,0,360,4);
+
+               end;
+               end;
+     end;
+
+   if jatekban4=false then
+   begin
+     setcolor(black);
+     setfillstyle(1,black);
+     for i:=1 to hossz4 do
+     begin
+       pieslice(kukacxy4[i,1],kukacxy4[i,2],0,360,4);
+       kukacxy4[i,1]:=0;
+       kukacxy4[i,2]:=0;
+     end;
+     if (ctf=true)or(dm=true)or(etdm=true) then kukac4_start;
+   end
+   else
+   if slow4= false then
+   for j:=1 to haste4 do
+     case ch4 of
+     '8'{fel }:begin
+               if (y41<=65) or
+                  ((ctf=true)and(x41>=95)and(x41<=130)and(y41>=205)and(y41<=210)) or
+                  ((ctf=true)and(x41>=95)and(x41<=135)and(y41<=250)and(y41>=240)) or
+                  ((ctf=true)and(x41>=490)and(x41<=525)and(y41>=205)and(y41<=210))or
+                  ((ctf=true)and(x41>=490)and(x41<=525)and(y41<=250)and(y41>=240)) then
+               begin
+                jatekban4:=false;
+               end
+               else
+               begin
+                setcolor(white);
+                setfillstyle(1,white);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x41,y41,0,360,4);
+                y41:=y41-10;
+                x42:=kukacxy4[hossz4,1];
+                y42:=kukacxy4[hossz4,2];
+
+                for i:=hossz4 downto 2 do
+                begin
+                  kukacxy4[i,1]:=kukacxy4[i-1,1];
+                  kukacxy4[i,2]:=kukacxy4[i-1,2];
+                end;
+
+                kukacxy4[1,1]:=x41;
+                kukacxy4[1,2]:=y41;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(lightgreen);
+                  setfillstyle(1,lightgreen);
+                end;
+                if redsteal2=true then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x41,y41,0,360,4);
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x42,y42,0,360,4);
+               end;
+               end;
+
+
+     '5'{le  }:begin
+               if (y41>=465)or
+                  ((ctf=true)and(x41>=95)and(x41<=130)and(y41>=190)and(y41<=195)) or
+                  ((ctf=true)and(x41>=95)and(x41<=135)and(y41<=235)and(y41>=225)) or
+                  ((ctf=true)and(x41>=490)and(x41<=525)and(y41>=190)and(y41<=195))or
+                  ((ctf=true)and(x41>=490)and(x41<=525)and(y41<=235)and(y41>=225)) then
+               begin
+                jatekban4:=false;
+               end
+               else
+               begin
+                setcolor(white);
+                setfillstyle(1,white);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x41,y41,0,360,4);
+                y41:=y41+10;
+                x42:=kukacxy4[hossz4,1];
+                y42:=kukacxy4[hossz4,2];
+
+                for i:=hossz4 downto 2 do
+                begin
+                  kukacxy4[i,1]:=kukacxy4[i-1,1];
+                  kukacxy4[i,2]:=kukacxy4[i-1,2];
+                end;
+
+                kukacxy4[1,1]:=x41;
+                kukacxy4[1,2]:=y41;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(lightgreen);
+                  setfillstyle(1,lightgreen);
+                end;
+                if redsteal2=true then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x41,y41,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x42,y42,0,360,4);
+               end;
+               end;
+
+     '4'{bal }:begin
+               if (x41<=15) or
+                  ((ctf=true)and(x41>=130)and(x41<=140)and(y41>=200)and(y41<=245)) or
+                  ((ctf=true)and(x41>=495)and(x41<=505)and(y41>=200)and(y41<=245)) or
+                  ((ctf=true)and(x41>=495)and(x41<=530)and(y41<=245)and(y41>=235)) or
+                  ((ctf=true)and(x41>=495)and(x41<=530)and(y41<=205)and(y41>=195)) then
+               begin
+                jatekban4:=false;
+               end
+               else
+               begin
+                setcolor(white);
+                setfillstyle(1,white);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x41,y41,0,360,4);
+                x41:=x41-10;
+                x42:=kukacxy4[hossz4,1];
+                y42:=kukacxy4[hossz4,2];
+
+                for i:=hossz4 downto 2 do
+                begin
+                  kukacxy4[i,1]:=kukacxy4[i-1,1];
+                  kukacxy4[i,2]:=kukacxy4[i-1,2];
+                end;
+
+                kukacxy4[1,1]:=x41;
+                kukacxy4[1,2]:=y41;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(lightgreen);
+                  setfillstyle(1,lightgreen);
+                end;
+                if redsteal2=true then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x41,y41,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x42,y42,0,360,4);
+               end;
+               end;
+
+     '6'{jobb}:begin
+               if (x41>=625) or
+                  ((ctf=true)and(x41>=120)and(x41<=130)and(y41>=200)and(y41<=245)) or
+                  ((ctf=true)and(x41>=480)and(x41<=490)and(y41>=200)and(y41<=245)) or
+                  ((ctf=true)and(x41>=85)and(x41<=130)and(y41<=245)and(y41>=235)) or
+                  ((ctf=true)and(x41>=85)and(x41<=130)and(y41<=205)and(y41>=195)) then
+               begin
+                jatekban4:=false;
+               end
+               else
+               begin
+                setcolor(white);
+                setfillstyle(1,white);
+                if (tdm=true)or(ctf=true)or(etdm=true) then
+                begin
+                  setcolor(red);
+                  setfillstyle(1,red);
+                end;
+                pieslice(x41,y41,0,360,4);
+                x41:=x41+10;
+                x42:=kukacxy4[hossz4,1];
+                y42:=kukacxy4[hossz4,2];
+
+                for i:=hossz4 downto 2 do
+                begin
+                  kukacxy4[i,1]:=kukacxy4[i-1,1];
+                  kukacxy4[i,2]:=kukacxy4[i-1,2];
+                end;
+
+                kukacxy4[1,1]:=x41;
+                kukacxy4[1,2]:=y41;
+
+                setcolor(green);
+                setfillstyle(1,green);
+                if (tdm=true)or(ctf=true) or (etdm=true)then
+                begin
+                  setcolor(lightgreen);
+                  setfillstyle(1,lightgreen);
+                end;
+                if redsteal2=true then
+                begin
+                  setcolor(blue);
+                  setfillstyle(1,blue);
+                end;
+                pieslice(x41,y41,0,360,4);
+
+                setcolor(black);
+                setfillstyle(1,black);
+                pieslice(x42,y42,0,360,4);
+               end;
+               end;
+     end;
+   {ÅtkîzÇsek...}
+   {kukac1}
+   if (tdm=true) or (ctf=true) or (etdm=true) then
+   begin
+     if (jatekban1 = true) and (etheral1=false) then
+     begin
+       for i:=3 to hossz do if ((kukacxy[1,1]=kukacxy[i,1])and(kukacxy[1,2]=kukacxy[i,2])) then jatekban1:=false;
+       for i:=2 to hossz2 do if ((kukacxy[1,1]=kukacxy2[i,1])and(kukacxy[1,2]=kukacxy2[i,2])) or
+           ((kukacxy[2,1]=kukacxy2[i,1])and(kukacxy[2,2]=kukacxy2[i,2])) then jatekban1:=false;
+       for i:=2 to hossz4 do if ((kukacxy[1,1]=kukacxy4[i,1])and(kukacxy[1,2]=kukacxy4[i,2])) or
+           ((kukacxy[2,1]=kukacxy4[i,1])and(kukacxy[2,2]=kukacxy4[i,2])) then jatekban1:=false;
+
+       if ((kukacxy[1,1]=kukacxy2[1,1]) and (kukacxy[1,2]=kukacxy2[1,2])){ or
+          ((kukacxy[2,1]=kukacxy2[1,1]) and (kukacxy[2,2]=kukacxy2[1,2]))} then
+       begin
+         jatekban1:=false;
+         jatekban2:=false;
+       end;
+        if ((kukacxy[1,1]=kukacxy4[1,1]) and (kukacxy[1,2]=kukacxy4[1,2])){ or
+          ((kukacxy[2,1]=kukacxy4[1,1]) and (kukacxy[2,2]=kukacxy4[1,2]))} then
+       begin
+         jatekban1:=false;
+         jatekban4:=false;
+       end;
+     end;
+   end
+   else
+   if (jatekban1 = true) and (etheral1=false) then
+   begin
+     for i:=3 to hossz do if ((kukacxy[1,1]=kukacxy[i,1])and(kukacxy[1,2]=kukacxy[i,2])) then jatekban1:=false;
+     for i:=2 to hossz2 do if ((kukacxy[1,1]=kukacxy2[i,1])and(kukacxy[1,2]=kukacxy2[i,2])) or
+         ((kukacxy[2,1]=kukacxy2[i,1])and(kukacxy[2,2]=kukacxy2[i,2])) then jatekban1:=false;
+     for i:=2 to hossz3 do if ((kukacxy[1,1]=kukacxy3[i,1])and(kukacxy[1,2]=kukacxy3[i,2])) or
+         ((kukacxy[2,1]=kukacxy3[i,1])and(kukacxy[2,2]=kukacxy3[i,2])) then jatekban1:=false;
+     for i:=2 to hossz4 do if ((kukacxy[1,1]=kukacxy4[i,1])and(kukacxy[1,2]=kukacxy4[i,2])) or
+         ((kukacxy[2,1]=kukacxy4[i,1])and(kukacxy[2,2]=kukacxy4[i,2])) then jatekban1:=false;
+
+     if ((kukacxy[1,1]=kukacxy2[1,1]) and (kukacxy[1,2]=kukacxy2[1,2])) then
+     begin
+       jatekban1:=false;
+       jatekban2:=false;
+     end;
+     if ((kukacxy[1,1]=kukacxy3[1,1]) and (kukacxy[1,2]=kukacxy3[1,2])) then
+     begin
+       jatekban1:=false;
+       jatekban3:=false;
+     end;
+     if ((kukacxy[1,1]=kukacxy4[1,1]) and (kukacxy[1,2]=kukacxy4[1,2])) then
+     begin
+       jatekban1:=false;
+       jatekban4:=false;
+     end;
+   end;
+
+   {kukac2}
+   if (tdm=true) or (ctf=true) or (etdm=true) then
+   begin
+     if (jatekban2 = true) and (etheral2=false) then
+     begin
+       for i:=3 to hossz2 do if ((kukacxy2[1,1]=kukacxy2[i,1])and(kukacxy2[1,2]=kukacxy2[i,2])) then jatekban2:=false;
+       for i:=2 to hossz do if ((kukacxy2[1,1]=kukacxy[i,1])and(kukacxy2[1,2]=kukacxy[i,2])) or
+           ((kukacxy2[2,1]=kukacxy[i,1])and(kukacxy2[2,2]=kukacxy[i,2])) then jatekban2:=false;
+       for i:=2 to hossz3 do if ((kukacxy2[1,1]=kukacxy3[i,1])and(kukacxy2[1,2]=kukacxy3[i,2])) or
+           ((kukacxy2[2,1]=kukacxy3[i,1])and(kukacxy2[2,2]=kukacxy3[i,2])) then jatekban2:=false;
+
+      if ((kukacxy2[1,1]=kukacxy[1,1]) and (kukacxy2[1,2]=kukacxy[1,2])){ or
+         ((kukacxy2[2,1]=kukacxy[1,1]) and (kukacxy2[2,2]=kukacxy[1,2]))} then
+      begin
+        jatekban2:=false;
+        jatekban1:=false;
+      end;
+      if ((kukacxy2[1,1]=kukacxy3[1,1]) and (kukacxy2[1,2]=kukacxy3[1,2])){ or
+          ((kukacxy2[2,1]=kukacxy3[1,1]) and (kukacxy2[2,2]=kukacxy3[1,2]))} then
+       begin
+         jatekban2:=false;
+         jatekban3:=false;
+       end;
+     end;
+   end
+   else
+   if (jatekban2 = true) and (etheral2=false) then
+   begin
+     for i:=3 to hossz2 do if ((kukacxy2[1,1]=kukacxy2[i,1])and(kukacxy2[1,2]=kukacxy2[i,2])) then jatekban2:=false;
+     for i:=2 to hossz do if ((kukacxy2[1,1]=kukacxy[i,1])and(kukacxy2[1,2]=kukacxy[i,2])) or
+         ((kukacxy2[2,1]=kukacxy[i,1])and(kukacxy2[2,2]=kukacxy[i,2])) then jatekban2:=false;
+     for i:=2 to hossz3 do if ((kukacxy2[1,1]=kukacxy3[i,1])and(kukacxy2[1,2]=kukacxy3[i,2])) or
+         ((kukacxy2[2,1]=kukacxy3[i,1])and(kukacxy2[2,2]=kukacxy3[i,2])) then jatekban2:=false;
+     for i:=2 to hossz4 do if ((kukacxy2[1,1]=kukacxy4[i,1])and(kukacxy2[1,2]=kukacxy4[i,2])) or
+         ((kukacxy2[2,1]=kukacxy4[i,1])and(kukacxy2[2,2]=kukacxy4[i,2])) then jatekban2:=false;
+
+     if ((kukacxy2[1,1]=kukacxy[1,1]) and (kukacxy2[1,2]=kukacxy[1,2])) then
+     begin
+       jatekban2:=false;
+       jatekban1:=false;
+     end;
+     if ((kukacxy2[1,1]=kukacxy3[1,1]) and (kukacxy2[1,2]=kukacxy3[1,2])) then
+     begin
+       jatekban2:=false;
+       jatekban3:=false;
+     end;
+     if ((kukacxy2[1,1]=kukacxy4[1,1]) and (kukacxy2[1,2]=kukacxy4[1,2])) then
+     begin
+       jatekban2:=false;
+       jatekban4:=false;
+     end;
+   end;
+
+   {kukac3}
+   if (tdm=true) or (ctf=true) or (etdm=true) then
+   begin
+     if (jatekban3 = true) and (etheral3=false)then
+     begin
+       for i:=3 to hossz3 do if ((kukacxy3[1,1]=kukacxy3[i,1])and(kukacxy3[1,2]=kukacxy3[i,2])) then jatekban3:=false;
+       for i:=2 to hossz2 do if ((kukacxy3[1,1]=kukacxy2[i,1])and(kukacxy3[1,2]=kukacxy2[i,2])) or
+           ((kukacxy3[2,1]=kukacxy2[i,1])and(kukacxy3[2,2]=kukacxy2[i,2])) then jatekban3:=false;
+       for i:=2 to hossz4 do if ((kukacxy3[1,1]=kukacxy4[i,1])and(kukacxy3[1,2]=kukacxy4[i,2])) or
+           ((kukacxy3[2,1]=kukacxy4[i,1])and(kukacxy3[2,2]=kukacxy4[i,2])) then jatekban3:=false;
+
+       if ((kukacxy3[1,1]=kukacxy2[1,1]) and (kukacxy3[1,2]=kukacxy2[1,2])){ or
+          ((kukacxy3[2,1]=kukacxy2[1,1]) and (kukacxy3[2,2]=kukacxy2[1,2]))} then
+       begin
+         jatekban3:=false;
+         jatekban2:=false;
+       end;
+       if ((kukacxy3[1,1]=kukacxy4[1,1]) and (kukacxy3[1,2]=kukacxy4[1,2])){ or
+          ((kukacxy3[2,1]=kukacxy4[1,1]) and (kukacxy3[2,2]=kukacxy4[1,2]))} then
+       begin
+         jatekban3:=false;
+         jatekban4:=false;
+       end;
+     end;
+    end
+    else
+    if (jatekban3 = true) and (etheral3=false)then
+     begin
+       for i:=3 to hossz3 do if ((kukacxy3[1,1]=kukacxy3[i,1])and(kukacxy3[1,2]=kukacxy3[i,2])) then jatekban3:=false;
+       for i:=2 to hossz do if ((kukacxy3[1,1]=kukacxy[i,1])and(kukacxy3[1,2]=kukacxy[i,2])) or
+           ((kukacxy3[2,1]=kukacxy[i,1])and(kukacxy3[2,2]=kukacxy[i,2])) then jatekban3:=false;
+       for i:=2 to hossz2 do if ((kukacxy3[1,1]=kukacxy2[i,1])and(kukacxy3[1,2]=kukacxy2[i,2])) or
+           ((kukacxy3[2,1]=kukacxy2[i,1])and(kukacxy3[2,2]=kukacxy2[i,2])) then jatekban3:=false;
+       for i:=2 to hossz4 do if ((kukacxy3[1,1]=kukacxy4[i,1])and(kukacxy3[1,2]=kukacxy4[i,2])) or
+           ((kukacxy3[2,1]=kukacxy4[i,1])and(kukacxy3[2,2]=kukacxy4[i,2])) then jatekban3:=false;
+
+       if ((kukacxy3[1,1]=kukacxy[1,1]) and (kukacxy3[1,2]=kukacxy[1,2])) then
+       begin
+         jatekban3:=false;
+         jatekban1:=false;
+       end;
+       if ((kukacxy3[1,1]=kukacxy2[1,1]) and (kukacxy3[1,2]=kukacxy2[1,2])) then
+       begin
+         jatekban3:=false;
+         jatekban2:=false;
+       end;
+       if ((kukacxy3[1,1]=kukacxy4[1,1]) and (kukacxy3[1,2]=kukacxy4[1,2])) then
+       begin
+         jatekban3:=false;
+         jatekban4:=false;
+       end;
+     end;
+
+   {kukac4}
+   if (tdm=true) or (ctf=true) or (etdm=true) then
+   begin
+     if (jatekban4 = true) and (etheral4=false) then
+     begin
+       for i:=3 to hossz4 do if ((kukacxy4[1,1]=kukacxy4[i,1])and(kukacxy4[1,2]=kukacxy4[i,2])) then jatekban4:=false;
+       for i:=2 to hossz do if ((kukacxy4[1,1]=kukacxy[i,1])and(kukacxy4[1,2]=kukacxy[i,2])) or
+           ((kukacxy4[2,1]=kukacxy[i,1])and(kukacxy4[2,2]=kukacxy[i,2])) then jatekban4:=false;
+       for i:=2 to hossz3 do if ((kukacxy4[1,1]=kukacxy3[i,1])and(kukacxy4[1,2]=kukacxy3[i,2])) or
+           ((kukacxy4[2,1]=kukacxy3[i,1])and(kukacxy4[2,2]=kukacxy3[i,2])) then jatekban4:=false;
+
+       if ((kukacxy4[1,1]=kukacxy[1,1]) and (kukacxy4[1,2]=kukacxy[1,2])){ or
+          ((kukacxy4[2,1]=kukacxy[1,1]) and (kukacxy4[2,2]=kukacxy[1,2]))} then
+       begin
+         jatekban4:=false;
+         jatekban1:=false;
+       end;
+       if ((kukacxy4[1,1]=kukacxy3[1,1]) and (kukacxy4[1,2]=kukacxy3[1,2])){ or
+          ((kukacxy4[2,1]=kukacxy3[1,1]) and (kukacxy4[2,2]=kukacxy3[1,2]))} then
+       begin
+         jatekban4:=false;
+         jatekban3:=false;
+       end;
+     end;
+   end
+   else
+   if (jatekban4 = true) and (etheral4=false) then
+     begin
+       for i:=3 to hossz4 do if ((kukacxy4[1,1]=kukacxy4[i,1])and(kukacxy4[1,2]=kukacxy4[i,2])) then jatekban4:=false;
+       for i:=2 to hossz do if ((kukacxy4[1,1]=kukacxy[i,1])and(kukacxy4[1,2]=kukacxy[i,2])) or
+           ((kukacxy4[2,1]=kukacxy[i,1])and(kukacxy4[2,2]=kukacxy[i,2])) then jatekban4:=false;
+       for i:=2 to hossz2 do if ((kukacxy4[1,1]=kukacxy2[i,1])and(kukacxy4[1,2]=kukacxy2[i,2])) or
+           ((kukacxy4[2,1]=kukacxy2[i,1])and(kukacxy4[2,2]=kukacxy2[i,2])) then jatekban4:=false;
+       for i:=2 to hossz3 do if ((kukacxy4[1,1]=kukacxy3[i,1])and(kukacxy4[1,2]=kukacxy3[i,2])) or
+           ((kukacxy4[2,1]=kukacxy3[i,1])and(kukacxy4[2,2]=kukacxy3[i,2])) then jatekban4:=false;
+
+       if ((kukacxy4[1,1]=kukacxy[1,1]) and (kukacxy4[1,2]=kukacxy[1,2])) then
+       begin
+         jatekban4:=false;
+         jatekban1:=false;
+       end;
+       if ((kukacxy4[1,1]=kukacxy2[1,1]) and (kukacxy4[1,2]=kukacxy2[1,2])) then
+       begin
+         jatekban4:=false;
+         jatekban2:=false;
+       end;
+       if ((kukacxy4[1,1]=kukacxy3[1,1]) and (kukacxy4[1,2]=kukacxy3[1,2])) then
+       begin
+         jatekban4:=false;
+         jatekban3:=false;
+       end;
+     end;
+
+     {ki nyer?}
+     if (tdm=true) then
+     begin
+       if (jatekban1=false) and (jatekban2=false) and (jatekban3=false) and (jatekban4=false) then draw;
+       if (jatekban1= true) and (jatekban2=false) and (jatekban3=false) and (jatekban4=false) and (num<>'1') then teamnyer1;
+       if (jatekban1=false) and (jatekban2= true) and (jatekban3=false) and (jatekban4=false) then teamnyer2;
+       if (jatekban1=false) and (jatekban2=false) and (jatekban3= true) and (jatekban4=false) then teamnyer1;
+       if (jatekban1=false) and (jatekban2=false) and (jatekban3=false) and (jatekban4= true) then teamnyer2;
+       if (jatekban1=true) and (jatekban3=true) and (jatekban2=false) and (jatekban4=false) then teamnyer1;
+       if (jatekban2=true) and (jatekban4=true) and (jatekban1=false) and (jatekban3=false) then teamnyer2;
+     end
+     else
+     if (tdm=false)and(etdm=false)and(ctf=false)and(dm=false) then
+     begin
+       if (jatekban1=false) and (jatekban2=false) and (jatekban3=false) and (jatekban4=false) then draw;
+       if (jatekban1= true) and (jatekban2=false) and (jatekban3=false) and (jatekban4=false) and (num<>'1') then nyer1;
+       if (jatekban1=false) and (jatekban2= true) and (jatekban3=false) and (jatekban4=false) then nyer2;
+       if (jatekban1=false) and (jatekban2=false) and (jatekban3= true) and (jatekban4=false) then nyer3;
+       if (jatekban1=false) and (jatekban2=false) and (jatekban3=false) and (jatekban4= true) then nyer4;
+     end;
+
+
+     delay(speed);
+
+     {kiesÇses pontok}
+     if (jatekban1=false) and (dm=true) then
+     begin
+       pontok1:=pontok1-3;
+       pont;
+     end;
+     if (jatekban2=false) and (num>='2') and (dm=true) then
+     begin
+       pontok2:=pontok2-3;
+       pont;
+     end;
+     if (jatekban3=false) and (num>='3') and (dm=true) then
+     begin
+       pontok3:=pontok3-3;
+       pont;
+     end;
+     if (jatekban4=false) and (num ='4') and (dm=true) then
+     begin
+       pontok4:=pontok4-3;
+       pont;
+     end;
+
+     if (jatekban1=false) and (etdm=true)then
+     begin
+       teampontok2:=teampontok2+3;
+       pont;
+     end;
+     if (jatekban3=false) and (etdm=true)then
+     begin
+       teampontok2:=teampontok2+3;
+       pont;
+     end;
+     if (jatekban2=false) and (etdm=true)then
+     begin
+       teampontok1:=teampontok1+3;
+       pont;
+     end;
+     if (jatekban4=false) and (etdm=true)then
+     begin
+       teampontok1:=teampontok1+3;
+       pont;
+     end;
+
+     {sima slow}
+     if (slow11) and (superido>0) then slow1:=not slow1;
+     if (slow21) and (superido>0) then slow2:=not slow2;
+     if (slow31) and (superido>0) then slow3:=not slow3;
+     if (slow41) and (superido>0) then slow4:=not slow4;
+
+     {etheral-ok}
+     if (slowall1) and (superido>0) then
+     begin
+      slow2:=not slow2; slow3:=not slow3; slow4:=not slow4;
+     end;
+
+     if (slowall2) and (superido>0) then
+     begin
+      slow1:=not slow1; slow3:=not slow3; slow4:=not slow4;
+     end;
+
+     if (slowall3) and (superido>0) then
+     begin
+      slow1:=not slow1; slow2:=not slow2; slow4:=not slow4;
+     end;
+
+     if (slowall4) and (superido>0) then
+     begin
+      slow1:=not slow1; slow2:=not slow2; slow3:=not slow3;
+     end;
+
+     if supermegy = true then dec(superido);
+     {eredeti †llapotok}
+     if superido <= 0 then
+     begin
+       supermegy:=false;
+       haste1:=1; haste2:=1; haste3:=1; haste4:=1;
+       etheral1:=false; etheral2:=false; etheral3:=false; etheral4:=false;
+       setfillstyle(1,8);
+       bar(10,38,100,48); bar(160,38,250,48); bar(310,38,400,48); bar(465,38,555,48);
+       slow1:=false; slow2:=false; slow3:=false; slow4:=false;
+       slow11:=false; slow21:=false; slow31:=false; slow41:=false;
+       slowall1:=false; slowall2:=false; slowall3:=false; slowall4:=false;
+     end;
+End;
+
+
+PROCEDURE kukacok;
+Begin
+    ch:=readkey;
+    if ch=#0 then ch:=readkey;
+
+    if (ch=#77) or (ch=#75) or (ch=#72) or (ch=#80) then
+    begin
+      ch1:=ch;
+      if (ch1=#77) and (tmpch=#75) then ch1:=tmpch;
+      if (ch1=#75) and (tmpch=#77) then ch1:=tmpch;
+      if (ch1=#80) and (tmpch=#72) then ch1:=tmpch;
+      if (ch1=#72) and (tmpch=#80) then ch1:=tmpch;
+      tmpch:=ch1;
+    end;
+
+    if (ch='a') or (ch='s') or (ch='d') or (ch='w') then
+    begin
+      ch2:=ch;
+      if (ch2='a') and (tmpch2='d') then ch2:=tmpch2;
+      if (ch2='d') and (tmpch2='a') then ch2:=tmpch2;
+      if (ch2='s') and (tmpch2='w') then ch2:=tmpch2;
+      if (ch2='w') and (tmpch2='s') then ch2:=tmpch2;
+      tmpch2:=ch2;
+    end;
+
+    if (ch='j') or (ch='k') or (ch='l') or (ch='i') then
+    begin
+      ch3:=ch;
+      if (ch3='j') and (tmpch3='l') then ch3:=tmpch3;
+      if (ch3='l') and (tmpch3='j') then ch3:=tmpch3;
+      if (ch3='k') and (tmpch3='I') then ch3:=tmpch3;
+      if (ch3='i') and (tmpch3='k') then ch3:=tmpch3;
+      tmpch3:=ch3;
+    end;
+
+    if (ch='4') or (ch='5') or (ch='6') or (ch='8') then
+    begin
+      ch4:=ch;
+      if (ch4='4') and (tmpch4='6') then ch4:=tmpch4;
+      if (ch4='6') and (tmpch4='4') then ch4:=tmpch4;
+      if (ch4='5') and (tmpch4='8') then ch4:=tmpch4;
+      if (ch4='8') and (tmpch4='5') then ch4:=tmpch4;
+      tmpch4:=ch4;
+    end;
+
+    repeat
+      irany;
+      if ctf=false then kaja else flags;
+      if ctf=false then eves else steal;
+    until keypressed;
+
+
+End;
+
+PROCEDURE kukac1_start;
+Begin
+  {ctf / kukac1 start koordin†t†k}
+  x:=60;
+  y:=80;
+  hossz:=5;
+  ch1:=#77;
+  tmpch:=#77;
+  bluesteal1:=false;
+  jatekban1:=true;
+
+  if jatekban1=true then
+  for i:=1 to hossz do
+  begin
+    kukacxy[i,1]:=x-(i*10);
+    kukacxy[i,2]:=y;
+  end;
+  x1:=kukacxy[1,1];
+  y1:=kukacxy[1,2];
+  x2:=kukacxy[hossz,1];
+  y2:=kukacxy[hossz,2];
+End;
+
+PROCEDURE kukac2_start;
+Begin
+  {ctf / kukac2 start koordin†t†k}
+  if num>='2' then
+  begin
+  x20:=580;
+  y20:=80;
+  hossz2:=5;
+  ch2:='a';
+  tmpch2:='a';
+  redsteal1:=false;
+  jatekban2:=true;
+
+  if jatekban2=true then
+  for i:=1 to hossz2 do
+  begin
+    kukacxy2[i,1]:=x20+(i*10);
+    kukacxy2[i,2]:=y20;
+  end;
+  x21:=kukacxy2[1,1];
+  y21:=kukacxy2[1,2];
+  x22:=kukacxy2[hossz2,1];
+  y22:=kukacxy2[hossz2,2];
+  end;
+End;
+
+PROCEDURE kukac3_start;
+Begin
+  {ctf / kukac3 start koordin†t†k}
+  if num>='3' then
+  begin
+  x30:=60;
+  y30:=450;
+  hossz3:=5;
+  ch3:='l';
+  tmpch3:='l';
+  bluesteal2:=false;
+  jatekban3:=true;
+
+  if jatekban3=true then
+  for i:=1 to hossz3 do
+  begin
+    kukacxy3[i,1]:=x30-(i*10);
+    kukacxy3[i,2]:=y30;
+  end;
+  x31:=kukacxy3[1,1];
+  y31:=kukacxy3[1,2];
+  x32:=kukacxy3[hossz3,1];
+  y32:=kukacxy3[hossz3,2];
+  end;
+End;
+
+PROCEDURE kukac4_start;
+Begin
+  {ctf / kukac4 startkoordin†t†k}
+  if num='4' then
+  begin
+  x40:=580;
+  y40:=450;
+  hossz4:=5;
+  ch4:='4';
+  tmpch4:='4';
+  redsteal2:=false;
+  jatekban4:=true;
+
+  if jatekban4=true then
+  for i:=1 to hossz4 do
+  begin
+    kukacxy4[i,1]:=x40+(i*10);
+    kukacxy4[i,2]:=y40;
+  end;
+  x41:=kukacxy4[1,1];
+  y41:=kukacxy4[1,2];
+  x42:=kukacxy4[hossz4,1];
+  y42:=kukacxy4[hossz4,2];
+  end;
+End;
+
+PROCEDURE kezdes;
+Begin
+  { alap †llapot :D }
+  palya;
+  ch:=#77;
+  hossz:=5; hossz2:=5; hossz3:=5; hossz4:=5;
+  if ctf=false then evett:=true else evett:=false;
+  speed:=10000;
+  pontok:='0';
+  tmppontok1:='0'; tmppontok2:='0'; tmppontok3:='0'; tmppontok4:='0';
+  haste1:=1; haste2:=1; haste3:=1; haste4:=1;
+  inc(round);
+  if ctf=false then superevett:=true else superevett:=false;
+  supermegy:=false;
+  superido:=0;
+  etheral1:=false; etheral2:=false; etheral3:=false; etheral4:=false;
+  slow11:=false; slow21:=false; slow31:=false; slow41:=false;
+  slowall1:=false; slowall2:=false; slowall3:=false; slowall4:=false;
+  slow1:=false; slow2:=false; slow3:=false; slow4:=false;
+  redsteal1:=false; bluesteal1:=false; redsteal2:=false; bluesteal2:=false;
+
+  case num of
+  '1':begin
+        jatekban1:=true;
+        jatekban2:=false;
+        jatekban3:=false;
+        jatekban4:=false;
+        jatekban11:=true;
+      end;
+  '2': begin
+         jatekban1:=true;
+         jatekban2:=true;
+         jatekban3:=false;
+         jatekban4:=false;
+       end;
+  '3': begin
+         jatekban1:=true;
+         jatekban2:=true;
+         jatekban3:=true;
+         jatekban4:=false;
+       end;
+  '4': begin
+         jatekban1:=true;
+         jatekban2:=true;
+         jatekban3:=true;
+         jatekban4:=true;
+       end;
+   end;
+
+   kukac1_start;
+   kukac2_start;
+   kukac3_start;
+   kukac4_start;
+
+  pont;
+
+  setcolor(7);
+  settextstyle(1,0,2);
+  str(round,rounds);
+  outtextxy(270,200,'Round ' + rounds);
+  while not keypressed do;
+  setcolor(black);
+  outtextxy(270,200,'Round ' + rounds);
+  for j:=7 to 8 do
+  for i:=1 to 5 do
+  begin
+    settextstyle(1,0,i);
+    setcolor(j);
+    outtextxy(600 div 2 -6*i,400 div 2 - 1*i,'Fight!');
+    setcolor(black);
+    delay(5000);
+    outtextxy(600 div 2 -6*i,400 div 2 - 1*i,'Fight!');
+  end;
+
+  repeat
+    kukacok;
+  until ch=#27;
+
+End;
+
+PROCEDURE numberplayer;
+Begin
+  if (tdm=false) and (ctf=false) and (etdm=false) then
+  begin
+    settextstyle(1,0,2);
+    setcolor(7);
+    outtextxy(220,230,'Number of players?');
+    num:=readkey;
+    if (num='1') or (num='2') or (num='3') or (num='4') or (num=#27) then
+    case num of
+    '1':begin
+          jatekban1:=true;
+          jatekban2:=false;
+          jatekban3:=false;
+          jatekban4:=false;
+        end;
+    '2': begin
+           jatekban1:=true;
+           jatekban2:=true;
+           jatekban3:=false;
+           jatekban4:=false;
+         end;
+    '3': begin
+           jatekban1:=true;
+           jatekban2:=true;
+           jatekban3:=true;
+           jatekban4:=false;
+         end;
+    '4': begin
+           jatekban1:=true;
+           jatekban2:=true;
+           jatekban3:=true;
+           jatekban4:=true;
+         end;
+     #27:halt;
+     end
+     else numberplayer;
+     setcolor(7);
+     settextstyle(1,0,1);
+     outtextxy(240,260,num+'palyer(s) enabled');
+     for i:=1 to 3 do delay(26000);
+   end
+   else
+   begin
+     num:='4';
+   end;
+End;
+
+PROCEDURE palya;
+Begin
+  if (tdm=true) or (etdm=true) then   {(endless) team death match map}
+  begin
+    setcolor(white);
+    setfillstyle(6,7);
+    bar(1,1,638,478);
+    setcolor(red);
+    setfillstyle(1,black);
+    bar(5,55,635,475);
+    setfillstyle(1,8);
+    bar(5,5,300,50);
+    bar(305,5,635,50);
+    setcolor(blue);
+    settextstyle(0,0,1);
+    outtextxy(80,10,'B l u e   T e a m');
+    setcolor(red);
+    outtextxy(410,10,'R e d   T e a m');
+  end
+  else
+  if ctf=true then    {capture the flag map}
+  begin
+    setcolor(white);
+    setfillstyle(6,7);
+    bar(1,1,638,478);
+    setcolor(red);
+    setfillstyle(1,black);
+    bar(5,55,635,475);
+    setfillstyle(1,8);
+    bar(5,5,300,50);
+    bar(305,5,635,50);
+
+    setfillstyle(6,7);
+    bar(95,200,130,240);
+    setfillstyle(1,0);
+    bar(95,205,125,235);
+
+    setfillstyle(6,7);
+    bar(490,200,525,240);
+    setfillstyle(1,0);
+    bar(495,205,525,235);
+
+    setcolor(blue);
+    settextstyle(0,0,1);
+    outtextxy(80,10,'B l u e   T e a m');
+    setcolor(red);
+    outtextxy(410,10,'R e d   T e a m');
+  end
+  else
+  begin
+    {death match / last man standing map}
+    setcolor(white);
+    setfillstyle(6,7);
+    bar(1,1,638,478);
+    setcolor(red);
+    setfillstyle(1,black);
+    bar(5,55,635,475);
+    setfillstyle(1,8);
+    bar(5,5,150,50);
+    bar(155,5,300,50);
+    bar(305,5,455,50);
+    bar(460,5,635,50);
+  end;
+End;
+
+PROCEDURE mods;
+VAR as:char;
+    modx: integer;
+Begin
+  settextstyle(1,0,1);
+  setcolor(red);
+  outtextxy(70,50,'S E L E C T   G A M E   T Y P E');
+  settextstyle(1,0,4);
+  setcolor(7);
+  outtextxy(30,100,'( 1.) LAST MAN STANDING');
+  outtextxy(30,150,'( 2.) TEAM DEATH MATCH');
+  outtextxy(30,200,'( 3.) CAPTURE THE FLAG');
+  outtextxy(30,250,'( 4.) DEATH MATCH');
+  outtextxy(30,300,'( 5.) ENDLESS TDM');
+  modx:=0;
+    repeat
+      as:=readkey;
+      case as of
+      '1':begin
+            setcolor(red);
+            outtextxy(30,100,'( 1.) LAST MAN STANDING');
+            setcolor(7);
+            outtextxy(30,150,'( 2.) TEAM DEATH MATCH');
+            outtextxy(30,200,'( 3.) CAPTURE THE FLAG');
+            outtextxy(30,250,'( 4.) DEATH MATCH');
+            outtextxy(30,300,'( 5.) ENDLESS TDM');
+            modx:=1;
+          end;
+      '2':begin
+            setcolor(7);
+            outtextxy(30,100,'( 1.) LAST MAN STANDING');
+            setcolor(red);
+            outtextxy(30,150,'( 2.) TEAM DEATH MATCH');
+            setcolor(7);
+            outtextxy(30,200,'( 3.) CAPTURE THE FLAG');
+            outtextxy(30,250,'( 4.) DEATH MATCH');
+            outtextxy(30,300,'( 5.) ENDLESS TDM');
+            modx:=2;
+          end;
+       '3':begin
+            setcolor(7);
+            outtextxy(30,100,'( 1.) LAST MAN STANDING');
+            outtextxy(30,150,'( 2.) TEAM DEATH MATCH');
+            setcolor(red);
+            outtextxy(30,200,'( 3.) CAPTURE THE FLAG');
+            setcolor(7);
+            outtextxy(30,250,'( 4.) DEATH MATCH');
+            outtextxy(30,300,'( 5.) ENDLESS TDM');
+            modx:=3;
+           end;
+        '4':begin
+            setcolor(7);
+            outtextxy(30,100,'( 1.) LAST MAN STANDING');
+            outtextxy(30,150,'( 2.) TEAM DEATH MATCH');
+            outtextxy(30,200,'( 3.) CAPTURE THE FLAG');
+            setcolor(red);
+            outtextxy(30,250,'( 4.) DEATH MATCH');
+            setcolor(7);
+            outtextxy(30,300,'( 5.) ENDLESS TDM');
+            modx:=4;
+           end;
+         '5':begin
+            setcolor(7);
+            outtextxy(30,100,'( 1.) LAST MAN STANDING');
+            outtextxy(30,150,'( 2.) TEAM DEATH MATCH');
+            outtextxy(30,200,'( 3.) CAPTURE THE FLAG');
+            outtextxy(30,250,'( 4.) DEATH MATCH');
+            setcolor(red);
+            outtextxy(30,300,'( 5.) ENDLESS TDM');
+            modx:=5;
+            end;
+      end;
+    until (as=#13)and((modx=1)or(modx=2)or(modx=3)or(modx=4)or(modx=5));
+
+  case modx of
+    2:tdm:=true;
+    3:ctf:=true;
+    4:dm:=true;
+    5:etdm:=true;
+  end;
+End;
+
+PROCEDURE intro;
+VAR
+    szoveg1,szoveg2,szoveg3,szoveg4,szoveg5,szoveg6,szoveg7: string;
+Begin
+  szoveg1:='MULTI SNAKE';
+  szoveg2:='3.1';
+  szoveg3:='Game created by';
+  szoveg4:='...:::KeO:::...';
+  szoveg5:='2005.11.20';
+  szoveg6:='All Right reserved';
+  szoveg7:='- BLOOD WARS VERSION -';
+  i:=400;
+
+  while not keypressed do
+  begin
+
+    setcolor(7);
+    settextstyle(1,0,2);
+    outtextxy(210,i,szoveg1);
+    settextstyle(1,0,1);
+    outtextxy(360,i+2,szoveg2);
+    settextstyle(2,0,4);
+    outtextxy(225,i+25,szoveg7);
+    settextstyle(1,0,1);
+    outtextxy(160,i+75,szoveg3);
+    outtextxy(340,i+75,szoveg4);
+    settextstyle(2,0,5);
+    outtextxy(250,i+100,szoveg5);
+    outtextxy(220,i+120,szoveg6);
+
+
+    setcolor(0);
+    settextstyle(1,0,2);
+    outtextxy(210,i,szoveg1);
+    settextstyle(1,0,1);
+    outtextxy(360,i+2,szoveg2);
+    settextstyle(2,0,4);
+    outtextxy(225,i+25,szoveg7);
+    settextstyle(1,0,1);
+    outtextxy(160,i+75,szoveg3);
+    outtextxy(340,i+75,szoveg4);
+    settextstyle(2,0,5);
+    outtextxy(250,i+100,szoveg5);
+    outtextxy(220,i+120,szoveg6);
+
+    i:=i-3;
+  end;
+End;
+
+BEGIN
+  gd:=detect;
+  INITGRAPH(gd,gm,'c:\kukac');
+  if graphresult <> grOK then halt;
+  cleardevice;
+
+  jatekban11:=false;
+  round:=0;
+  pontok1:=0;
+  pontok2:=0;
+  pontok3:=0;
+  pontok4:=0;
+  teampontok1:=0;
+  teampontok2:=0;
+
+  intro;
+  mods;
+  palya;
+  numberplayer;
+  kezdes;
+  vege;
+  closegraph;
+END.
