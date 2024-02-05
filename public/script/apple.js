@@ -1,10 +1,15 @@
 export const Apple = {
+    maxValue: 5,
+    colors: ["red", "orange", "yellow", "lightyellow", "gold"],
+
     createApple: function () {
-        const randomValue = Math.floor(Math.random() * 5) + 1;
+        const randomValue = Math.floor(Math.random() * this.maxValue) + 1;
         const appleInstance = {
             value: randomValue,
             position: this.getRandomPosition(),
+            color: this.getColor(randomValue),
         };
+
         this.renderApple(appleInstance);
 
         return appleInstance;
@@ -18,8 +23,13 @@ export const Apple = {
         return Array.from(squares).indexOf(emptySquares[randomIndex]);
     },
 
+    getColor: function (value) {
+        return this.colors[value - 1];
+    },
+
     renderApple: function (appleInstance) {
         const squares = document.querySelectorAll(".grid div");
         squares[appleInstance.position].classList.add("apple");
-    }
+        squares[appleInstance.position].classList.add(appleInstance.color);
+    },
 };

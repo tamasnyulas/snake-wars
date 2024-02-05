@@ -3,7 +3,6 @@ import { Apple } from './apple.js';
 
 export const Game = {
     grid: document.querySelector(".grid"),
-    popup: document.querySelector(".popup"),
     playAgain: document.querySelector(".playAgain"),
     scoreDisplay: document.querySelector(".scoreDisplay"),
     appleIndex: 0,
@@ -15,14 +14,24 @@ export const Game = {
     rows: 20,
     snakeUnit: 20,
     snake: null,
+    apple: null,
+
+    initialize: function () {
+        document.addEventListener("keydown", function (e) {
+            Snake.control(e, Game.snake, Game.columns);
+        });
+        this.createBoard();
+
+        this.playAgain.addEventListener("click", this.replay.bind(this));
+    },
 
     addSnake: function (initialPosition, initialDirection) {
         this.snake = Snake.createSnake(initialPosition, initialDirection);
     },
 
-    resetSnakes: function (c) {
-        initialPosition = this.snake.initialPosition;
-        initialDirection = this.snake.initialDirection;
+    resetSnakes: function () {
+        let initialPosition = this.snake.initialPosition;
+        let initialDirection = this.snake.initialDirection;
         this.snake = Snake.createSnake(initialPosition, initialDirection);
     },
 
@@ -30,7 +39,7 @@ export const Game = {
         this.grid.style.width = this.columns * this.snakeUnit;
         this.grid.style.height = this.rows * this.snakeUnit;
 
-        this.popup.style.display = "none";
+        this.playAgain.style.display = "none";
         for (let i = 0; i < this.columns * this.rows; i++) {
             let div = document.createElement("div");
             div.style.width = this.snakeUnit;
@@ -41,7 +50,7 @@ export const Game = {
 
     startGame: function () {
         let squares = document.querySelectorAll(".grid div");
-        this.randomApple(squares);
+        this.apple = Apple.createApple();
         this.score = 0;
         this.scoreDisplay.innerHTML = this.score;
         this.intervalTime = 250;
@@ -51,45 +60,43 @@ export const Game = {
             squares[index].classList.add("snake")
         );
 
-        this.interval = setInterval(this.moveOutcome.bind(this), this.intervalTime);
+        this.interval = setInterval(this.updateGame.bind(this), this.intervalTime);
     },
 
-    moveOutcome: function () {
+    updateGame: function () {
         let squares = document.querySelectorAll(".grid div");
         if (Snake.checkForHits(this.snake, this.columns, this.rows)) {
-            console.log("you hit something");
-            this.popup.style.display = "flex";
-            return clearInterval(this.interval);
-        } else {
-            Snake.move(this.snake);
+            return this.endGame();
+        }
+
+        Snake.move(this.snake);
+
+        if (squares[this.snake.currentPosition[0]].classList.contains("apple")) {
             this.eatApple(squares);
         }
     },
 
-    eatApple: function (squares) {
-        let tail = this.snake.currentPosition[this.snake.currentPosition.length - 1];
-        if (squares[this.snake.currentPosition[0]].classList.contains("apple")) {
-            squares[this.snake.currentPosition[0]].classList.remove("apple");
+    endGame: function () {
+        this.playAgain.style.display = "flex";
+        this.playAgain.focus();
 
-            this.snake.growth += 5;
-
-            this.randomApple(squares);
-            this.score++;
-            this.scoreDisplay.textContent = this.score;
-            clearInterval(this.interval);
-            this.intervalTime = this.intervalTime * this.speedIncrease;
-            this.interval = setInterval(
-                this.moveOutcome.bind(this),
-                this.intervalTime
-            );
-        }
+        return clearInterval(this.interval);
     },
 
-    randomApple: function (squares) {
-        do {
-            this.appleIndex = Math.floor(Math.random() * squares.length);
-        } while (squares[this.appleIndex].classList.contains("snake"));
-        squares[this.appleIndex].classList.add("apple");
+    eatApple: function (squares) {
+        let tail = this.snake.currentPosition[this.snake.currentPosition.length - 1];
+
+        squares[this.snake.currentPosition[0]].classList.remove("apple");
+        this.snake.growth += this.apple.value;
+        this.apple = Apple.createApple();
+        this.score++;
+        this.scoreDisplay.textContent = this.score;
+        clearInterval(this.interval);
+        this.intervalTime = this.intervalTime * this.speedIncrease;
+        this.interval = setInterval(
+            this.updateGame.bind(this),
+            this.intervalTime
+        );
     },
 
     replay: function () {
@@ -97,6 +104,6 @@ export const Game = {
         this.createBoard();
         this.resetSnakes();
         this.startGame();
-        this.popup.style.display = "none";
+        this.playAgain.style.display = "none";
     },
 };
