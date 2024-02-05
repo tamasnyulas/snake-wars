@@ -5,9 +5,10 @@ export const Game = {
     grid: document.querySelector(".grid"),
     playAgain: document.querySelector(".playAgain"),
     scoreDisplay: document.querySelector(".scoreDisplay"),
+    settingsForm: document.querySelector(".settingsForm"),
     appleIndex: 0,
     score: 0,
-    speedIncrease: 0.8,
+    speedIncrement: 0.8,
     intervalTime: 0,
     interval: 0,
     columns: 20,
@@ -23,6 +24,7 @@ export const Game = {
         this.createBoard();
 
         this.playAgain.addEventListener("click", this.replay.bind(this));
+        this.settingsForm.addEventListener("submit", this.replay.bind(this));
     },
 
     addSnake: function (initialPosition, initialDirection) {
@@ -35,7 +37,14 @@ export const Game = {
         this.snake = Snake.createSnake(initialPosition, initialDirection);
     },
 
+    updateSettings: function () {
+        this.speedIncrement = parseFloat(this.settingsForm.speedIncrement.value);
+        this.columns = parseInt(this.settingsForm.columns.value);
+        this.rows = parseInt(this.settingsForm.rows.value);
+    },
+
     createBoard: function () {
+        this.updateSettings();
         this.grid.style.width = this.columns * this.snakeUnit;
         this.grid.style.height = this.rows * this.snakeUnit;
 
@@ -92,7 +101,7 @@ export const Game = {
         this.score++;
         this.scoreDisplay.textContent = this.score;
         clearInterval(this.interval);
-        this.intervalTime = this.intervalTime * this.speedIncrease;
+        this.intervalTime = this.intervalTime * this.speedIncrement;
         this.interval = setInterval(
             this.updateGame.bind(this),
             this.intervalTime
@@ -105,5 +114,7 @@ export const Game = {
         this.resetSnakes();
         this.startGame();
         this.playAgain.style.display = "none";
+
+        return false;
     },
 };

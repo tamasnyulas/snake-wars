@@ -1,6 +1,6 @@
 export const Apple = {
     maxValue: 5,
-    colors: ["red", "orange", "yellow", "lightyellow", "gold"],
+    colors: ["one", "two", "three", "four", "five"],
 
     createApple: function () {
         const randomValue = Math.floor(Math.random() * this.maxValue) + 1;

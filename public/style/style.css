@@ -1,5 +1,10 @@
 body {
-    
+    background-color: black;
+    color: rgb(206, 206, 206)
+}
+
+.side-menu {
+    position: absolute;
 }
 
 .grid {
@@ -11,7 +16,7 @@ body {
 }
 
 .grid div {
-    border: 1px rgb(21, 21, 21) solid;
+    border: 1px black solid;
     box-sizing: border-box
 }
 
@@ -23,24 +28,24 @@ body {
     border-radius: 20px;
 }
 
-.apple.red {
-    background-color: red;
+.apple.one {
+    background-color: rgb(0, 255, 85);
 }
 
-.apple.orange {
-    background-color: orange;
+.apple.two {
+    background-color: rgb(0, 89, 255);
 }
 
-.apple.yellow {
-    background-color: yellow;
+.apple.three {
+    background-color: rgb(153, 0, 255);;
 }
 
-.apple.lightyellow {
-    background-color: lightyellow;
+.apple.four {
+    background-color: rgb(237, 181, 14);
 }
 
-.apple.gold {
-    background-color: gold;
+.apple.five {
+    background-color: rgb(255, 0, 140);
 }
 
 .popup {
@@ -53,4 +58,18 @@ body {
 button.playAgain {
     margin: 0 auto;
     display: block;
+}
+
+.settingsForm {
+    padding: 0 0 0 20px;
+}
+
+.settingsForm label{
+    display: inline-block;
+    width: 80px;
+}
+
+.settingsForm .row {
+    display: block;
+    margin: 10px 0 5px 0;
 }
