@@ -41,12 +41,40 @@ export const Snake = {
         const hitRight = snakeInstance.currentPosition[0] % columns === columns - 1 && snakeInstance.currentDirection === 1;
         const hitLeft = snakeInstance.currentPosition[0] % columns === 0 && snakeInstance.currentDirection === -1;
         const hitTop = snakeInstance.currentPosition[0] - columns <= 0 && snakeInstance.currentDirection === -columns;
-        const hitSelf = grid[snakeInstance.currentPosition[0] + snakeInstance.currentDirection]?.classList.contains("snake");
+        const hitSnake = grid[snakeInstance.currentPosition[0] + snakeInstance.currentDirection] !== null;
 
-        if (hitBottom || hitRight || hitLeft || hitTop || hitSelf) {
+        if (hitBottom || hitRight || hitLeft || hitTop || hitSnake) {
             return true;
         } else {
             return false;
         }
-    }
+    },
+
+    move: function (snakeInstance) {
+        if (!snakeInstance.canMove) return;
+
+        // Add new head
+        snakeInstance.currentPosition.unshift(snakeInstance.currentPosition[0] + snakeInstance.currentDirection);
+        
+        if (snakeInstance.growth > 0) {
+            // Grow snake
+            snakeInstance.growth--;
+        } else {
+            // Remove tail
+            snakeInstance.currentPosition.pop();
+        }
+    },
+
+    changeDirection: function (snakeInstance, direction, columns) {
+        if (direction === 'right' && snakeInstance.currentDirection !== -1) {
+            snakeInstance.currentDirection = 1;
+        } else if (direction === 'up' && snakeInstance.currentDirection !== columns) {
+            snakeInstance.currentDirection = -columns;
+        } else if (direction === 'left' && snakeInstance.currentDirection !== 1) {
+            snakeInstance.currentDirection = -1;
+        } else if (direction === 'down' && snakeInstance.currentDirection !== -columns) {
+            snakeInstance.currentDirection = columns;
+        }
+        console.log('change direction:', snakeInstance.id, snakeInstance.currentDirection);
+    },
 };

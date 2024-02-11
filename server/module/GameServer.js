@@ -23,7 +23,7 @@ export const GameServer = {
         speedIncrement: 0.8,
         columns: 20,
         rows: 20,
-        players: 2,
+        players: 1,
         endEarly: true,
     },
     interval: null,
@@ -103,7 +103,12 @@ export const GameServer = {
         });
 
         socket.on('snake-control', (msg) => {
-            console.log('snake #' + msg.snakeId + ' goes ' + msg.direction);
+            if (!this.state.snakes[socket.id].canMove) return;
+
+            Snake.changeDirection(this.state.snakes[socket.id], msg.direction, this.settings.columns);
+
+            // broadcast the new game state to the clients
+            this.io.emit('sync-state', this.state); // TODO: consider implementing a lighter solution to avoid broadcasting the entire game state
         });
     },
 
@@ -148,11 +153,11 @@ export const GameServer = {
 
         this.io.emit('start-game', this.state);
 
-        //this.interval = setInterval(this.updateGame.bind(this), this.state.intervalTime);
+        this.interval = setInterval(this.gameEventLoop.bind(this), this.state.intervalTime);
     },
 
-    /*updateGame: function () {
-        this.state.snakes.forEach(snake => {
+    gameEventLoop: function () {
+        Object.values(this.state.snakes).forEach(snake => {
             if (Snake.checkForHits(snake, this.state.grid, this.settings.columns, this.settings.rows)) { // TODO: consider moving checkForHits to Snake.move and make Snake.move object-oriented
                 snake.canMove = false; 
 
@@ -163,21 +168,22 @@ export const GameServer = {
                 }
             }
 
-            Snake.move(snake, this.state.grid);
+            Snake.move(snake);
 
-            if (this.state.grid[snake.currentPosition[0]].classList.contains("apple")) {
-                this.eatApple(snake);
-            }
+            //if (this.state.grid[snake.currentPosition[0]].classList.contains("apple")) {
+            //    this.eatApple(snake);
+            //}
         });
-    },*/
+    },
 
     endGame: function () {
+        clearInterval(this.interval);
+
         this.state.stateName = 'waiting';
         this.state.apple = null;
         this.resetSnakes();
 
-
-        this.io.emit('sync-state', this.state);
+        this.io.emit('end-game', this.state);
     },
 
     eatApple: function (snake) {
@@ -223,7 +229,7 @@ export const GameServer = {
 
         clearInterval(this.interval);
         this.state.intervalTime = newIntervalTime;
-        this.interval = setInterval(this.updateGame.bind(this), this.state.intervalTime);
+        this.interval = setInterval(this.gameEventLoop.bind(this), this.state.intervalTime);
     },
 
     /*replay: function () {
