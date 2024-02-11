@@ -22,25 +22,21 @@ export const GameClient = {
             console.log('connected', response);
             this.settings = response.settings;
 
-            this.createBoard();
             this.syncState(response.state);
 
             // MVP
-            if (this.state.activePlayers < this.settings.players) {
+            if (Object.keys(this.state.snakes).length < this.settings.players) {
                 // TODO: these events should be triggered manually by the user
                 socket.emit('join-game', {name: socket.id}); // TODO: name should be set by the user
                 socket.emit('ready-check', true);
             }
         });
 
-        socket.on('set-snakes', (snakes) => {
-            this.snakes = snakes;
-            console.log('snakes updated', this.snakes);
-        });
+        socket.on('sync-state', (state) => this.syncState(state));
 
-        socket.on('start-game', () => {
+        socket.on('start-game', (state) => {
             console.log('The game is starting');
-            //this.startGame();
+            this.syncState(state);
         });
 
         /*Snake.initialize(this.snakes, this.settings.columns);
@@ -64,6 +60,7 @@ export const GameClient = {
     },*/
 
     createBoard: function () {
+        this.board.innerHTML = "";
         this.board.style.width = this.settings.columns * this.snakeUnit;
         this.board.style.height = this.settings.rows * this.snakeUnit;
 
@@ -80,7 +77,38 @@ export const GameClient = {
 
     syncState: function (state) {
         this.state = state; // TODO: consider checking differences and reacting to changes appropriately
+        console.log('state synced', this.state);
+
+        this.syncGame();
     },
+
+    syncGame: function () {
+        // TODO: empty board and render snakes and apple
+        this.createBoard();
+
+        clearInterval(this.interval);
+
+        this.snakes = [];
+        Object.values(this.state.snakes).forEach(snakeState => {
+            let snake = Snake.createSnake(snakeState);
+            this.snakes.push(snake);
+            Snake.render(snake, this.grid);
+        });
+
+        if (this.state.apple) {
+            this.apple = Apple.renderApple(this.state.apple, this.grid);
+        }
+
+        if (this.state.stateName === "playing") {
+            // TODO: ensure game event loop is running with the appropriate interval
+        }
+    },
+
+
+
+
+
+
 
     startGame: function () {
         this.apple = Apple.createApple(this.grid);

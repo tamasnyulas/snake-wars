@@ -15,10 +15,16 @@ export const Apple = {
     },
 
     getRandomPosition: function (grid) {
-        const emptySquares = Array.from(grid).filter(square => square === null);
+        const emptySquares = grid.reduce((acc, square, index) => {
+            if (square === null) {
+                acc.push(index);
+            }
+            return acc;
+        }, []);
+
         const randomIndex = Math.floor(Math.random() * emptySquares.length);
 
-        return Array.from(grid).indexOf(emptySquares[randomIndex]);
+        return emptySquares[randomIndex];
     },
 
     getColor: function (value) {

@@ -23,7 +23,7 @@ export const GameServer = {
         speedIncrement: 0.8,
         columns: 20,
         rows: 20,
-        players: 1,
+        players: 2,
         endEarly: true,
     },
     interval: null,
@@ -71,22 +71,20 @@ export const GameServer = {
 
             // create a new snake for this user
             this.createSnake(socket);
-
-            // broadcast the new snake to the clients
-            this.io.emit('set-snakes', this.state.snakes);
         });
 
         socket.on('disconnect', () => {
+            // return early if the user is not a player
+            if (this.state.snakes[socket.id]) {
+                // remove the player from the game
+                delete this.state.snakes[socket.id];
+                console.log('a player left the game, waiting for new players.');
+
+                this.endGame();
+            }
+
             console.log('user disconnected', socket.id);
             socket.removeAllListeners();
-
-            // return early if the user is not a player
-            if (!this.state.snakes[socket.id]) return;
-
-            // remove the player from the game
-            delete this.state.snakes[socket.id];
-
-            this.io.emit('set-snakes', this.state.snakes);
         });
 
         socket.on('ready-check', (msg) => {
@@ -99,7 +97,6 @@ export const GameServer = {
                 Object.values(this.state.snakes).every(snake => snake.readyCheck)
             ) {
                 console.log('all players are ready, starting the game.');
-                this.state.stateName = 'playing';
 
                 this.startGame(); // FIXME: provide data as necessary
             }
@@ -115,6 +112,9 @@ export const GameServer = {
             ...this.players[Object.keys(this.state.snakes).length], // TODO: calculate player initial position dynamically
             id: socket.id,
         });
+
+        // broadcast the new game state to the clients
+        this.io.emit('sync-state', this.state);
     },
 
     createVirtualGrid: function () {
@@ -134,6 +134,8 @@ export const GameServer = {
     },
 
     startGame: function () {
+        this.state.stateName = 'playing';
+
         Object.values(this.state.snakes).forEach((snake, i) => {
             snake.initialPosition.forEach(position => {
                 this.state.grid[position] = i;
@@ -144,12 +146,12 @@ export const GameServer = {
         this.state.intervalTime = 200;
         this.state.activePlayers = Object.keys(this.state.snakes).length;
 
-        this.io.emit('start-game');
+        this.io.emit('start-game', this.state);
 
         //this.interval = setInterval(this.updateGame.bind(this), this.state.intervalTime);
     },
 
-    updateGame: function () {
+    /*updateGame: function () {
         this.state.snakes.forEach(snake => {
             if (Snake.checkForHits(snake, this.state.grid, this.settings.columns, this.settings.rows)) { // TODO: consider moving checkForHits to Snake.move and make Snake.move object-oriented
                 snake.canMove = false; 
@@ -167,15 +169,15 @@ export const GameServer = {
                 this.eatApple(snake);
             }
         });
-    },
+    },*/
 
     endGame: function () {
-        clearInterval(this.interval);
+        this.state.stateName = 'waiting';
+        this.state.apple = null;
+        this.resetSnakes();
 
-        this.refreshScore(true);
 
-        this.playAgain.style.display = "flex";
-        this.playAgain.focus();
+        this.io.emit('sync-state', this.state);
     },
 
     eatApple: function (snake) {
@@ -234,6 +236,6 @@ export const GameServer = {
     },*/
 
     resetSnakes: function () {
-        this.state.snakes.forEach(snake => snake.reset());
+        Object.values(this.state.snakes).forEach(snake => snake.reset());
     },
 };
