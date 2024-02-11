@@ -1,17 +1,24 @@
 import { Snake } from './Snake.js';
-//import { Apple } from './apple.js';
+import { Apple } from './Apple.js';
+
+/*
+ * TODO: 
+ * - As the first step, a user should be able to create a game (handling multiple games is optional).
+ * - A user should be able to set the game settings through a form.
+ * - When a game is created, it should have a unique, sharable URL.
+ * - The game should initialize based on the settings when it's created.
+ */
 
 export const GameServer = {
-    //board: document.querySelector(".board"),
-    grid: null,
-    //playAgain: document.querySelector(".playAgain"),
-    //scoreDisplay: document.querySelector(".scoreDisplay"),
-    //settingsForm: document.querySelector(".settingsForm"),
-    intervalTime: 0,
-    interval: 0,
-    minInterval: 50,
-    snakeUnit: 20,
-    activePlayers: 0,
+    io: null,
+    state: {
+        stateName: 'waiting',
+        grid: null,
+        intervalTime: 0,
+        activePlayers: 0,
+        snakes: {},
+        apple: null,
+    },
     settings: {
         speedIncrement: 0.8,
         columns: 20,
@@ -19,66 +26,54 @@ export const GameServer = {
         players: 1,
         endEarly: true,
     },
+    interval: null,
+    minInterval: 50,
+    // TODO: remove players after MVP
     players: [
         { // player 1
             initialPosition: [17, 18, 19], // TODO: calculate initial position based on rows and columns
             initialDirection: -1,
-            //color: 'orange',
         },
         { // player 2
             initialPosition: [2, 1, 0],
             initialDirection: 1,
-            /*controlKeys: { 
-                left: 'a', 
-                up: 'w', 
-                right: 'd', 
-                down: 's',
-            },
-            color: 'cornflowerblue',*/
         },
         { // player 3
             initialPosition: [(19*20)+2, (19*20)+1, (19*20)+0], // TODO: calculate initial position based on rows and columns
             initialDirection: 1,
-            /*controlKeys: { 
-                left: '4', 
-                up: '8', 
-                right: '6', 
-                down: '5',
-            },
-            color: 'tan',*/
         },
     ],
-    snakes: {},
-    apple: null,
-    io: null,
-    state: 'waiting',
 
     initialize: function (io) {
         this.io = io;
 
         // Listen for incoming socket.io connections
         this.io.on('connection', (socket) => this.connectUser(socket));
-        
-        /*Snake.initialize(this.snakes, this.settings.columns);
-        this.createSnakes();
-        this.createBoard();
 
-        document.addEventListener("keydown", function (e) {
-            Snake.control(e, Game.snakes, Game.settings.columns);
-        });
-
-        this.playAgain.addEventListener("click", this.replay.bind(this));
-        this.settingsForm.addEventListener("submit", this.updateSettings.bind(this));*/
+        this.updateSettings();
+        this.createVirtualGrid();
     },
 
     connectUser: function (socket) {
         console.log('a user connected', socket.id);
 
-        this.activePlayers += 1;
-        
+        socket.emit('connected', {
+            settings: this.settings,
+            state: this.state,
+        });
+
         // set up server event listeners
-        socket.on('snake-control', (msg) => {
-            console.log('snake #' + msg.snakeId + ' goes ' + msg.direction);
+        socket.on('join-game', (msg) => { // TODO: get player name from msg
+            console.log('a player joined the game', socket.id);
+
+            // return early if the game is already full
+            if (Object.keys(this.state.snakes).length >= this.settings.players) return;
+
+            // create a new snake for this user
+            this.createSnake(socket);
+
+            // broadcast the new snake to the clients
+            this.io.emit('set-snakes', this.state.snakes);
         });
 
         socket.on('disconnect', () => {
@@ -86,96 +81,89 @@ export const GameServer = {
             socket.removeAllListeners();
 
             // return early if the user is not a player
-            if (!this.snakes[socket.id]) return;
+            if (!this.state.snakes[socket.id]) return;
 
             // remove the player from the game
-            this.activePlayers -= 1;
-            delete this.snakes[socket.id];
+            delete this.state.snakes[socket.id];
 
-            this.io.emit('set-snakes', this.snakes);
+            this.io.emit('set-snakes', this.state.snakes);
         });
 
         socket.on('ready-check', (msg) => {
-            console.log('Player ready: ', socket.id);
-            this.snakes[socket.id].readyCheck = !!msg;
+            console.log('a player is ready: ', socket.id);
+            this.state.snakes[socket.id].readyCheck = !!msg;
 
             // start the game if all players are ready
-            if (Object.values(this.snakes).every(snake => snake.readyCheck)) {
-                console.log('All players are ready, starting the game.');
-                this.state = 'playing';
-                //this.startGame(); // FIXME: this is not working
+            if (
+                this.settings.players == Object.keys(this.state.snakes).length && 
+                Object.values(this.state.snakes).every(snake => snake.readyCheck)
+            ) {
+                console.log('all players are ready, starting the game.');
+                this.state.stateName = 'playing';
 
-                this.io.emit('start-game'); // FIXME: provide data as necessary
+                this.startGame(); // FIXME: provide data as necessary
             }
         });
 
-        // create a new snake for this user
-        this.createSnake(socket);
-
-        // broadcast the new snake to the clients
-        this.io.emit('set-snakes', this.snakes);
+        socket.on('snake-control', (msg) => {
+            console.log('snake #' + msg.snakeId + ' goes ' + msg.direction);
+        });
     },
 
     createSnake: function (socket) {
-        this.snakes[socket.id] = Snake.createSnake({
-            ...this.players[this.activePlayers - 1],
+        this.state.snakes[socket.id] = Snake.createSnake({
+            ...this.players[Object.keys(this.state.snakes).length], // TODO: calculate player initial position dynamically
             id: socket.id,
         });
     },
 
-    createBoard: function () {
-        this.board.style.width = this.settings.columns * this.snakeUnit;
-        this.board.style.height = this.settings.rows * this.snakeUnit;
-
-        this.playAgain.style.display = "none";
-        for (let i = 0; i < this.settings.columns * this.settings.rows; i++) {
-            let div = document.createElement("div");
-            div.classList.add("grid");
-            div.style.width = this.snakeUnit;
-            div.style.height = this.snakeUnit;
-            this.board.appendChild(div);
-        }
-        this.grid = document.querySelectorAll(".grid");
+    createVirtualGrid: function () {
+        this.state.grid = Array.from({ length: this.settings.columns * this.settings.rows }, (_, i) => null);
     },
 
     updateSettings: function () {
-        this.settings.speedIncrement = parseFloat(this.settingsForm.speedIncrement.value);
+        // TODO: get settings from the game creation parameters
+
+        /*this.settings.speedIncrement = parseFloat(this.settingsForm.speedIncrement.value);
         this.settings.columns = parseInt(this.settingsForm.columns.value);
         this.settings.rows = parseInt(this.settingsForm.rows.value);
         this.settings.players = parseInt(this.settingsForm.players.value);
-        this.settings.endEarly = this.settingsForm.endEarly.checked;
+        this.settings.endEarly = this.settingsForm.endEarly.checked;*/
 
-        this.createSnakes();
-        Snake.initialize(this.snakes, this.settings.columns);
-        this.replay();
+        //Snake.initialize(this.state.snakes, this.settings.columns);
     },
 
     startGame: function () {
-        this.apple = Apple.createApple(this.grid);
-        this.intervalTime = 200;
-        this.activePlayers = this.snakes.length;
-        
-        this.snakes.forEach(snake => Snake.render(snake, this.grid));
-        this.refreshScore();
+        Object.values(this.state.snakes).forEach((snake, i) => {
+            snake.initialPosition.forEach(position => {
+                this.state.grid[position] = i;
+            });
+        });
 
-        this.interval = setInterval(this.updateGame.bind(this), this.intervalTime); // TODO: consider changing intervals to exist per snake
+        this.state.apple = Apple.createApple(this.state.grid);
+        this.state.intervalTime = 200;
+        this.state.activePlayers = Object.keys(this.state.snakes).length;
+
+        this.io.emit('start-game');
+
+        //this.interval = setInterval(this.updateGame.bind(this), this.state.intervalTime);
     },
 
     updateGame: function () {
-        this.snakes.forEach(snake => {
-            if (Snake.checkForHits(snake, this.grid, this.settings.columns, this.settings.rows)) { // TODO: consider moving checkForHits to Snake.move and make Snake.move object-oriented
+        this.state.snakes.forEach(snake => {
+            if (Snake.checkForHits(snake, this.state.grid, this.settings.columns, this.settings.rows)) { // TODO: consider moving checkForHits to Snake.move and make Snake.move object-oriented
                 snake.canMove = false; 
 
                 // check end game condition
-                if (this.settings.endEarly || --this.activePlayers < 1) {
+                if (this.settings.endEarly || --this.state.activePlayers < 1) {
                     this.endGame();
                     return;    
                 }
             }
 
-            Snake.move(snake, this.grid);
+            Snake.move(snake, this.state.grid);
 
-            if (this.grid[snake.currentPosition[0]].classList.contains("apple")) {
+            if (this.state.grid[snake.currentPosition[0]].classList.contains("apple")) {
                 this.eatApple(snake);
             }
         });
@@ -191,22 +179,22 @@ export const GameServer = {
     },
 
     eatApple: function (snake) {
-        this.grid[snake.currentPosition[0]].classList.remove("apple");
-        snake.score(this.apple.value);
+        this.state.grid[snake.currentPosition[0]].classList.remove("apple");
+        snake.score(this.state.apple.value);
         this.refreshScore();
 
-        if (this.apple.speedBomb) {
+        if (this.state.apple.speedBomb) {
             this.increaseSpeed();
         }
 
-        this.apple = Apple.createApple(this.grid);
+        this.state.apple = Apple.createApple(this.state.grid);
     },
 
-    refreshScore: function (endGame = false) {
+    /*refreshScore: function (endGame = false) {
         let topScore = this.determineTopScore();
         this.scoreDisplay.innerHTML = "";
 
-        this.snakes.forEach((snake, index) => {
+        this.state.snakes.forEach((snake, index) => {
             const row = document.createElement("tr");
             row.style.color = snake.color;
 
@@ -220,32 +208,32 @@ export const GameServer = {
     },
 
     determineTopScore: function () {
-        let scores = this.snakes.map(snake => snake.currentScore);
+        let scores = this.state.snakes.map(snake => snake.currentScore);
         let topScore = Math.max(...scores);
         
         return topScore
-    },
+    },*/
 
     increaseSpeed: function () {
-        let newIntervalTime = this.intervalTime * this.settings.speedIncrement;
+        let newIntervalTime = this.state.intervalTime * this.settings.speedIncrement;
 
         if (newIntervalTime <= this.minInterval) return;
 
         clearInterval(this.interval);
-        this.intervalTime = newIntervalTime;
-        this.interval = setInterval(this.updateGame.bind(this), this.intervalTime);
+        this.state.intervalTime = newIntervalTime;
+        this.interval = setInterval(this.updateGame.bind(this), this.state.intervalTime);
     },
 
-    replay: function () {
+    /*replay: function () {
         this.board.innerHTML = "";
         this.endGame();
         this.resetSnakes();
         this.createBoard();
         this.startGame();
         this.playAgain.style.display = "none";
-    },
+    },*/
 
     resetSnakes: function () {
-        this.snakes.forEach(snake => snake.reset());
+        this.state.snakes.forEach(snake => snake.reset());
     },
 };

@@ -16,8 +16,6 @@ export const Snake = {
 
     createSnake: function (options) {
         const defaultOptions = {
-            initialPosition: [2, 1, 0],
-            initialDirection: 1,
             controlKeys: {
                 left: 'ArrowLeft',
                 up: 'ArrowUp',

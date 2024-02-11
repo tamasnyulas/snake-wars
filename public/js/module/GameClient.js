@@ -3,70 +3,45 @@ import { Apple } from './Apple.js';
 
 export const GameClient = {
     board: document.querySelector(".board"),
-    grid: null,
     playAgain: document.querySelector(".playAgain"),
     scoreDisplay: document.querySelector(".scoreDisplay"),
-    settingsForm: document.querySelector(".settingsForm"),
-    intervalTime: 0,
-    interval: 0,
-    minInterval: 50,
-    snakeUnit: 20,
-    activePlayers: 1,
-    settings: {
-        speedIncrement: 0.8,
-        columns: 20,
-        rows: 20,
-        players: 1,
-        endEarly: true,
-    },
-    players: [
-        { // player 2
-            initialPosition: [17, 18, 19], // TODO: calculate initial position based on rows and columns
-            initialDirection: -1,
-            color: 'orange',
-        },
-        { // player 1
-            initialPosition: [2, 1, 0],
-            initialDirection: 1,
-            controlKeys: { 
-                left: 'a', 
-                up: 'w', 
-                right: 'd', 
-                down: 's',
-            },
-            color: 'cornflowerblue',
-        },
-        { // player 3
-            initialPosition: [(19*20)+2, (19*20)+1, (19*20)+0], // TODO: calculate initial position based on rows and columns
-            initialDirection: 1,
-            controlKeys: { 
-                left: '4', 
-            up: '8', 
-            right: '6', 
-            down: '5',
-            },
-            color: 'tan',
-        },
-    ],
-    snakes: {},
+    grid: null,
+    //settingsForm: document.querySelector(".settingsForm"),
+
     apple: null,
     socket: null,
+    settings: null,
+    state: null,
+    snakeUnit: 20,
 
     initialize: function (socket) {
         this.socket = socket;
 
         // Set up client event listeners
+        socket.on('connected', (response) => {
+            console.log('connected', response);
+            this.settings = response.settings;
+
+            this.createBoard();
+            this.syncState(response.state);
+
+            // MVP
+            if (this.state.activePlayers < this.settings.players) {
+                // TODO: these events should be triggered manually by the user
+                socket.emit('join-game', {name: socket.id}); // TODO: name should be set by the user
+                socket.emit('ready-check', true);
+            }
+        });
+
         socket.on('set-snakes', (snakes) => {
             this.snakes = snakes;
+            console.log('snakes updated', this.snakes);
         });
 
         socket.on('start-game', () => {
             console.log('The game is starting');
             //this.startGame();
         });
-
-        // (MVP) send ready check to server
-        socket.emit('ready-check', true);// TODO: ready check must be implemented on the UI side
 
         /*Snake.initialize(this.snakes, this.settings.columns);
         this.createSnakes();
@@ -80,13 +55,13 @@ export const GameClient = {
         this.settingsForm.addEventListener("submit", this.updateSettings.bind(this));*/
     },
 
-    createSnakes: function () {
+    /*createSnakes: function () {
         this.snakes = [];
 
         for (let i = 0; i< this.settings.players; i++) {
             this.snakes.push(Snake.createSnake(this.players[i]));
         }
-    },
+    },*/
 
     createBoard: function () {
         this.board.style.width = this.settings.columns * this.snakeUnit;
@@ -103,16 +78,8 @@ export const GameClient = {
         this.grid = document.querySelectorAll(".grid");
     },
 
-    updateSettings: function () {
-        this.settings.speedIncrement = parseFloat(this.settingsForm.speedIncrement.value);
-        this.settings.columns = parseInt(this.settingsForm.columns.value);
-        this.settings.rows = parseInt(this.settingsForm.rows.value);
-        this.settings.players = parseInt(this.settingsForm.players.value);
-        this.settings.endEarly = this.settingsForm.endEarly.checked;
-
-        this.createSnakes();
-        Snake.initialize(this.snakes, this.settings.columns);
-        this.replay();
+    syncState: function (state) {
+        this.state = state; // TODO: consider checking differences and reacting to changes appropriately
     },
 
     startGame: function () {
