@@ -108,15 +108,19 @@ export const Snake = {
     },
 
     control: function (e, snakes, columns) {
-        snakes.forEach(snakeInstance => {
+        snakes.forEach((snakeInstance, index) => {
             if (e.key === snakeInstance.controlKeys.right && snakeInstance.currentDirection !== -1) {
                 snakeInstance.currentDirection = 1;
+                this.socket.emit('snake-control', { snakeId: index, direction: 'right' });
             } else if (e.key === snakeInstance.controlKeys.up && snakeInstance.currentDirection !== columns) {
                 snakeInstance.currentDirection = -columns;
+                this.socket.emit('snake-control', { snakeId: index, direction: 'up' })
             } else if (e.key === snakeInstance.controlKeys.left && snakeInstance.currentDirection !== 1) {
                 snakeInstance.currentDirection = -1;
+                this.socket.emit('snake-control', { snakeId: index, direction: 'left' });
             } else if (e.key === snakeInstance.controlKeys.down && snakeInstance.currentDirection !== -columns) {
                 snakeInstance.currentDirection = columns;
+                this.socket.emit('snake-control', { snakeId: index, direction: 'down' });
             }
         })
     },

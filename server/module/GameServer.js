@@ -1,17 +1,17 @@
-import { Snake } from './snake.js';
-import { Apple } from './apple.js';
+import { Snake } from './Snake.js';
+//import { Apple } from './apple.js';
 
-export const Game = {
-    board: document.querySelector(".board"),
+export const GameServer = {
+    //board: document.querySelector(".board"),
     grid: null,
-    playAgain: document.querySelector(".playAgain"),
-    scoreDisplay: document.querySelector(".scoreDisplay"),
-    settingsForm: document.querySelector(".settingsForm"),
+    //playAgain: document.querySelector(".playAgain"),
+    //scoreDisplay: document.querySelector(".scoreDisplay"),
+    //settingsForm: document.querySelector(".settingsForm"),
     intervalTime: 0,
     interval: 0,
     minInterval: 50,
     snakeUnit: 20,
-    activePlayers: 1,
+    activePlayers: 0,
     settings: {
         speedIncrement: 0.8,
         columns: 20,
@@ -21,38 +21,45 @@ export const Game = {
     },
     players: [
         { // player 1
+            initialPosition: [17, 18, 19], // TODO: calculate initial position based on rows and columns
+            initialDirection: -1,
+            //color: 'orange',
+        },
+        { // player 2
             initialPosition: [2, 1, 0],
             initialDirection: 1,
-            controlKeys: { 
+            /*controlKeys: { 
                 left: 'a', 
                 up: 'w', 
                 right: 'd', 
                 down: 's',
             },
-            color: 'cornflowerblue',
-        },
-        { // player 2
-            initialPosition: [17, 18, 19], // TODO: calculate initial position based on rows and columns
-            initialDirection: -1,
-            color: 'orange',
+            color: 'cornflowerblue',*/
         },
         { // player 3
             initialPosition: [(19*20)+2, (19*20)+1, (19*20)+0], // TODO: calculate initial position based on rows and columns
             initialDirection: 1,
-            controlKeys: { 
+            /*controlKeys: { 
                 left: '4', 
-            up: '8', 
-            right: '6', 
-            down: '5',
+                up: '8', 
+                right: '6', 
+                down: '5',
             },
-            color: 'tan',
+            color: 'tan',*/
         },
     ],
-    snakes: [],
+    snakes: {},
     apple: null,
+    io: null,
+    state: 'waiting',
 
-    initialize: function () {
-        Snake.initialize(this.snakes, this.settings.columns);
+    initialize: function (io) {
+        this.io = io;
+
+        // Listen for incoming socket.io connections
+        this.io.on('connection', (socket) => this.connectUser(socket));
+        
+        /*Snake.initialize(this.snakes, this.settings.columns);
         this.createSnakes();
         this.createBoard();
 
@@ -61,15 +68,59 @@ export const Game = {
         });
 
         this.playAgain.addEventListener("click", this.replay.bind(this));
-        this.settingsForm.addEventListener("submit", this.updateSettings.bind(this));
+        this.settingsForm.addEventListener("submit", this.updateSettings.bind(this));*/
     },
 
-    createSnakes: function () {
-        this.snakes = [];
+    connectUser: function (socket) {
+        console.log('a user connected', socket.id);
 
-        for (let i = 0; i< this.settings.players; i++) {
-            this.snakes.push(Snake.createSnake(this.players[i]));
-        }
+        this.activePlayers += 1;
+        
+        // set up server event listeners
+        socket.on('snake-control', (msg) => {
+            console.log('snake #' + msg.snakeId + ' goes ' + msg.direction);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('user disconnected', socket.id);
+            socket.removeAllListeners();
+
+            // return early if the user is not a player
+            if (!this.snakes[socket.id]) return;
+
+            // remove the player from the game
+            this.activePlayers -= 1;
+            delete this.snakes[socket.id];
+
+            this.io.emit('set-snakes', this.snakes);
+        });
+
+        socket.on('ready-check', (msg) => {
+            console.log('Player ready: ', socket.id);
+            this.snakes[socket.id].readyCheck = !!msg;
+
+            // start the game if all players are ready
+            if (Object.values(this.snakes).every(snake => snake.readyCheck)) {
+                console.log('All players are ready, starting the game.');
+                this.state = 'playing';
+                //this.startGame(); // FIXME: this is not working
+
+                this.io.emit('start-game'); // FIXME: provide data as necessary
+            }
+        });
+
+        // create a new snake for this user
+        this.createSnake(socket);
+
+        // broadcast the new snake to the clients
+        this.io.emit('set-snakes', this.snakes);
+    },
+
+    createSnake: function (socket) {
+        this.snakes[socket.id] = Snake.createSnake({
+            ...this.players[this.activePlayers - 1],
+            id: socket.id,
+        });
     },
 
     createBoard: function () {
