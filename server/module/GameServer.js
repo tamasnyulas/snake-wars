@@ -103,9 +103,10 @@ export const GameServer = {
         });
 
         socket.on('snake-control', (msg) => {
-            if (!this.state.snakes[socket.id].canMove) return;
+            let snake = this.state.snakes[socket.id];
+            if (!snake.canMove) return;
 
-            Snake.changeDirection(this.state.snakes[socket.id], msg.direction, this.settings.columns);
+            snake.changeDirection(msg.direction, this.settings.columns);
 
             // broadcast the new game state to the clients
             this.io.emit('sync-state', this.state); // TODO: consider implementing a lighter solution to avoid broadcasting the entire game state
@@ -158,17 +159,13 @@ export const GameServer = {
 
     gameEventLoop: function () {
         Object.values(this.state.snakes).forEach(snake => {
-            if (Snake.checkForHits(snake, this.state.grid, this.settings.columns, this.settings.rows)) { // TODO: consider moving checkForHits to Snake.move and make Snake.move object-oriented
-                snake.canMove = false; 
-
-                // check end game condition
-                if (this.settings.endEarly || --this.state.activePlayers < 1) {
-                    this.endGame();
-                    return;    
-                }
+            if (
+                !snake.move(this.state.grid, this.settings.columns, this.settings.rows) && 
+                (this.settings.endEarly || --this.state.activePlayers < 1)
+            ) {
+                this.endGame();
+                return;
             }
-
-            Snake.move(snake);
 
             //if (this.state.grid[snake.currentPosition[0]].classList.contains("apple")) {
             //    this.eatApple(snake);
@@ -181,8 +178,10 @@ export const GameServer = {
 
         this.state.stateName = 'waiting';
         this.state.apple = null;
-        this.resetSnakes();
+        this.state.activePlayers = 0;
+        //this.resetSnakes();
 
+        console.log('game over');
         this.io.emit('end-game', this.state);
     },
 

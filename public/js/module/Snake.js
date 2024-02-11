@@ -1,5 +1,11 @@
 export const Snake = {
     directionMap: {},
+    controlKeys: {
+        left: 'ArrowLeft',
+        up: 'ArrowUp',
+        right: 'ArrowRight',
+        down: 'ArrowDown',
+    },
 
     initialize: function (columns) {
         this.directionMap = {
@@ -15,15 +21,7 @@ export const Snake = {
     },
 
     createSnake: function (options) {
-        const defaultOptions = {
-            controlKeys: {
-                left: 'ArrowLeft',
-                up: 'ArrowUp',
-                right: 'ArrowRight',
-                down: 'ArrowDown',
-            },
-            color: 'lightgray',
-        };
+        
 
         const snakeInstance = {
             ...defaultOptions,
@@ -106,16 +104,18 @@ export const Snake = {
     },
 
     control: function (e, snakeInstance, columns, socket) {
-        if (e.key === snakeInstance.controlKeys.right && snakeInstance.currentDirection !== -1) {
+        if (!snakeInstance.canMove) return;
+
+        if (e.key === this.controlKeys.right && snakeInstance.currentDirection !== -1) {
             snakeInstance.currentDirection = 1;
             socket.emit('snake-control', {direction: 'right'});
-        } else if (e.key === snakeInstance.controlKeys.up && snakeInstance.currentDirection !== columns) {
+        } else if (e.key === this.controlKeys.up && snakeInstance.currentDirection !== columns) {
             snakeInstance.currentDirection = -columns;
             socket.emit('snake-control', {direction: 'up'})
-        } else if (e.key === snakeInstance.controlKeys.left && snakeInstance.currentDirection !== 1) {
+        } else if (e.key === this.controlKeys.left && snakeInstance.currentDirection !== 1) {
             snakeInstance.currentDirection = -1;
             socket.emit('snake-control', {direction: 'left'});
-        } else if (e.key === snakeInstance.controlKeys.down && snakeInstance.currentDirection !== -columns) {
+        } else if (e.key === this.controlKeys.down && snakeInstance.currentDirection !== -columns) {
             snakeInstance.currentDirection = columns;
             socket.emit('snake-control', {direction: 'down'});
         }

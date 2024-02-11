@@ -34,9 +34,7 @@ export const GameClient = {
                 socket.emit('ready-check', true);
 
                 document.addEventListener("keydown", (e) => {
-                    let snake = Array.from(this.snakes).find(snake => snake.id === socket.id);
-
-                    Snake.control(e, snake, this.settings.columns, socket);
+                    Snake.control(e, this.state.snakes[socket.id], this.settings.columns, socket);
                 });
             }
         });
@@ -53,6 +51,7 @@ export const GameClient = {
         socket.on('end-game', (state) => {
             console.log('The game is ending');
             this.syncState(state);
+            this.syncGame();
             this.endGame();
         });
 
@@ -67,14 +66,6 @@ export const GameClient = {
         this.playAgain.addEventListener("click", this.replay.bind(this));
         this.settingsForm.addEventListener("submit", this.updateSettings.bind(this));*/
     },
-
-    /*createSnakes: function () {
-        this.snakes = [];
-
-        for (let i = 0; i< this.settings.players; i++) {
-            this.snakes.push(Snake.createSnake(this.players[i]));
-        }
-    },*/
 
     createBoard: function () {
         this.board.innerHTML = "";
@@ -93,17 +84,17 @@ export const GameClient = {
     },
 
     syncState: function (state) {
+        console.log('syncing state', this.state, 'into', state);
         this.state = state; // TODO: consider checking differences and reacting to changes appropriately
-        console.log('state synced', this.state);
     },
 
     syncGame: function () {
-        clearInterval(this.interval);
+        console.log('syncing game');
+        clearInterval(this.interval); // TODO: clear and reset only if necessary
 
-        this.snakes = [];
-        Object.values(this.state.snakes).forEach(snakeState => {
-            let snake = Snake.createSnake(snakeState);
-            this.snakes.push(snake);
+        document.querySelectorAll('.grid').forEach(element => element.classList.remove('snake'));
+        
+        Object.values(this.state.snakes).forEach(snake => {
             Snake.render(snake, this.grid);
         });
 
@@ -117,7 +108,7 @@ export const GameClient = {
     },
 
     gameEventLoop: function () {
-        this.snakes.forEach(snake => {
+        Object.values(this.state.snakes).forEach(snake => {
             Snake.move(snake, this.grid);
 
             //if (this.grid[snake.currentPosition[0]].classList.contains("apple")) {
@@ -154,9 +145,9 @@ export const GameClient = {
     startGame: function () {
         this.apple = Apple.createApple(this.grid);
         this.intervalTime = 200;
-        this.activePlayers = this.snakes.length;
+        this.activePlayers = Object.keys(this.state.snakes).length;
         
-        this.snakes.forEach(snake => Snake.render(snake, this.grid));
+        Object.values(this.state.snakes).forEach(snake => Snake.render(snake, this.grid));
         this.refreshScore();
 
         this.interval = setInterval(this.gameEventLoop.bind(this), this.intervalTime); // TODO: consider changing intervals to exist per snake
@@ -166,7 +157,7 @@ export const GameClient = {
         let topScore = this.determineTopScore();
         this.scoreDisplay.innerHTML = "";
 
-        this.snakes.forEach((snake, index) => {
+        Object.values(this.state.snakes).forEach((snake, index) => {
             const row = document.createElement("tr");
             row.style.color = snake.color;
 
@@ -180,7 +171,7 @@ export const GameClient = {
     },
 
     determineTopScore: function () {
-        let scores = this.snakes.map(snake => snake.currentScore);
+        let scores = Object.values(this.state.snakes).map(snake => snake.currentScore);
         let topScore = Math.max(...scores);
         
         return topScore
@@ -199,13 +190,8 @@ export const GameClient = {
     replay: function () {
         this.board.innerHTML = "";
         this.endGame();
-        this.resetSnakes();
         this.createBoard();
         this.startGame();
         this.playAgain.style.display = "none";
-    },
-
-    resetSnakes: function () {
-        this.snakes.forEach(snake => snake.reset());
     },
 };

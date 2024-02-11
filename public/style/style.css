@@ -20,6 +20,10 @@ body {
     box-sizing: border-box
 }
 
+.snake {
+    background-color: silver;
+}
+
 /* Add direction-specific styles */
 .snake.head[data-direction="north"] {
     border-radius: 50% 50% 0 0;

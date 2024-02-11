@@ -17,6 +17,7 @@ export const Snake = {
             currentScore: 0,
             growth: 0,
             canMove: true,
+            
             reset: function () {
                 this.currentPosition = [...this.initialPosition];
                 this.currentDirection = this.initialDirection;
@@ -25,56 +26,63 @@ export const Snake = {
                 this.currentScore = 0;
                 this.canMove = true;
             },
+
             score: function (value) {
                 this.growth += value;
                 this.currentScore += value;
             },
+
+            checkForHits: function (grid, columns, rows) {
+                const hitBottom = this.currentPosition[0] + columns >= columns * rows && this.currentDirection === columns;
+                const hitRight = this.currentPosition[0] % columns === columns - 1 && this.currentDirection === 1;
+                const hitLeft = this.currentPosition[0] % columns === 0 && this.currentDirection === -1;
+                const hitTop = this.currentPosition[0] - columns <= 0 && this.currentDirection === -columns;
+                const hitSnake = grid[this.currentPosition[0] + this.currentDirection] !== null;
+
+                if (hitBottom || hitRight || hitLeft || hitTop || hitSnake) {
+                    return true;
+                } else {
+                    return false;
+                }
+            },
+
+            move: function (grid, columns, rows) {
+                if (!this.canMove) return false;
+        
+                if (this.checkForHits(grid, columns, rows)) {
+                    this.canMove = false;
+
+                    return false;
+                }
+        
+                // Add new head
+                this.currentPosition.unshift(this.currentPosition[0] + this.currentDirection);
+                
+                if (this.growth > 0) {
+                    // Grow snake
+                    this.growth--;
+                } else {
+                    // Remove tail
+                    this.currentPosition.pop();
+                }
+
+                return true;
+            },
+        
+            changeDirection: function (direction, columns) {
+                if (direction === 'right' && this.currentDirection !== -1) {
+                    this.currentDirection = 1;
+                } else if (direction === 'up' && this.currentDirection !== columns) {
+                    this.currentDirection = -columns;
+                } else if (direction === 'left' && this.currentDirection !== 1) {
+                    this.currentDirection = -1;
+                } else if (direction === 'down' && this.currentDirection !== -columns) {
+                    this.currentDirection = columns;
+                }
+                //console.log('change direction:', this.id, this.currentDirection);
+            },
         };
 
         return snakeInstance;
-    },
-
-    checkForHits: function (snakeInstance, grid, columns, rows) {
-        if (!snakeInstance.canMove) return false;
-
-        const hitBottom = snakeInstance.currentPosition[0] + columns >= columns * rows && snakeInstance.currentDirection === columns;
-        const hitRight = snakeInstance.currentPosition[0] % columns === columns - 1 && snakeInstance.currentDirection === 1;
-        const hitLeft = snakeInstance.currentPosition[0] % columns === 0 && snakeInstance.currentDirection === -1;
-        const hitTop = snakeInstance.currentPosition[0] - columns <= 0 && snakeInstance.currentDirection === -columns;
-        const hitSnake = grid[snakeInstance.currentPosition[0] + snakeInstance.currentDirection] !== null;
-
-        if (hitBottom || hitRight || hitLeft || hitTop || hitSnake) {
-            return true;
-        } else {
-            return false;
-        }
-    },
-
-    move: function (snakeInstance) {
-        if (!snakeInstance.canMove) return;
-
-        // Add new head
-        snakeInstance.currentPosition.unshift(snakeInstance.currentPosition[0] + snakeInstance.currentDirection);
-        
-        if (snakeInstance.growth > 0) {
-            // Grow snake
-            snakeInstance.growth--;
-        } else {
-            // Remove tail
-            snakeInstance.currentPosition.pop();
-        }
-    },
-
-    changeDirection: function (snakeInstance, direction, columns) {
-        if (direction === 'right' && snakeInstance.currentDirection !== -1) {
-            snakeInstance.currentDirection = 1;
-        } else if (direction === 'up' && snakeInstance.currentDirection !== columns) {
-            snakeInstance.currentDirection = -columns;
-        } else if (direction === 'left' && snakeInstance.currentDirection !== 1) {
-            snakeInstance.currentDirection = -1;
-        } else if (direction === 'down' && snakeInstance.currentDirection !== -columns) {
-            snakeInstance.currentDirection = columns;
-        }
-        console.log('change direction:', snakeInstance.id, snakeInstance.currentDirection);
     },
 };
