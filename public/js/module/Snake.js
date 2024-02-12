@@ -22,7 +22,6 @@ export const Snake = {
 
     createSnake: function (options) {
         
-
         const snakeInstance = {
             ...defaultOptions,
             ...options,
@@ -49,12 +48,31 @@ export const Snake = {
         return snakeInstance;
     },
 
-    render: function (snakeInstance, grid) {
-        snakeInstance.currentPosition.forEach((index, i) => {
-            let snakePart = i === 0 ? "head" : i === snakeInstance.currentPosition.length - 1 ? "tail" : "body";
+    render: function (snakeState, grid) {
+        if (snakeState.previousPosition) {
+            snakeState.previousPosition.forEach(index => {
+                grid[index].classList.remove("head", "body", "tail", "snake");
+            });
+        }
+
+        const lastBodyIndex = snakeState.currentPosition[snakeState.currentPosition.length - 2];
+
+        snakeState.currentPosition.forEach((index, i) => {
+            const previousIndex = snakeState.previousPosition[i - 1];
+            let snakePart = i === 0 ? "head" : i === snakeState.currentPosition.length - 1 ? "tail" : "body";
             grid[index].classList.add("snake", snakePart);
-            grid[index].style.backgroundColor = snakeInstance.color;
-            grid[index].dataset.direction = this.directionMap[snakeInstance.currentDirection];
+            grid[index].style.backgroundColor = snakeState.color;
+
+            if (i === 0) {
+                // Set direction for snake head
+                grid[index].dataset.direction = this.directionMap[snakeState.currentDirection];
+            } else if (i === snakeState.currentPosition.length - 1) {
+                // Set direction for snake tail
+                grid[index].dataset.direction = grid[lastBodyIndex].dataset.direction; // TODO: initial direction is not working
+            } else {
+                // Set direction for snake body
+                grid[index].dataset.direction = grid[previousIndex].dataset.direction;
+            }
         });
     },
 

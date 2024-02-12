@@ -3,7 +3,9 @@ import { Apple } from './Apple.js';
 
 export const GameClient = {
     board: document.querySelector(".board"),
-    playAgain: document.querySelector(".playAgain"),
+    popup: document.querySelector(".popup"),
+    btnJoinGame: document.querySelector(".joinGame"),
+    btnReadyCheck: document.querySelector(".readyCheck"),
     scoreDisplay: document.querySelector(".scoreDisplay"),
     grid: null,
     //settingsForm: document.querySelector(".settingsForm"),
@@ -23,28 +25,20 @@ export const GameClient = {
             this.settings = response.settings;
             Snake.initialize(this.settings.columns);
 
-            this.syncState(response.state);
             this.createBoard();
+            this.syncState(response.state);
             this.syncGame();
 
             // MVP
-            if (Object.keys(this.state.snakes).length < this.settings.players) {
-                // TODO: these events should be triggered manually by the user
-                socket.emit('join-game', {name: socket.id}); // TODO: name should be set by the user
-                socket.emit('ready-check', true);
-
-                document.addEventListener("keydown", (e) => {
-                    Snake.control(e, this.state.snakes[socket.id], this.settings.columns, socket);
-                });
-            }
+            this.checkJoin();
         });
 
         socket.on('sync-state', (state) => this.syncState(state));
 
         socket.on('start-game', (state) => {
             console.log('The game is starting');
-            this.syncState(state);
             this.createBoard();
+            this.syncState(state);
             this.syncGame();
         });
 
@@ -55,16 +49,30 @@ export const GameClient = {
             this.endGame();
         });
 
-        /*
-        this.createSnakes();
-        this.createBoard();
+        this.btnJoinGame.addEventListener("click", this.joinGame.bind(this));
+        this.btnReadyCheck.addEventListener("click", this.readyCheck.bind(this));
+    },
 
-        document.addEventListener("keydown", function (e) {
-            Snake.control(e, Game.snakes, Game.settings.columns);
+    // TODO: This should be called when a user joins or leaves the game
+    checkJoin: function () {
+        this.btnJoinGame.style.display = (Object.keys(this.state.snakes).length < this.settings.players) ? "inline-block" : "none";
+    },
+
+    joinGame: function () {
+        this.socket.emit('join-game', {name: this.socket.id});
+
+        this.btnJoinGame.style.display = "none";
+        this.btnReadyCheck.style.display = "inline-block";
+    },
+
+    readyCheck: function () {
+        this.socket.emit('ready-check', true);
+
+        this.btnReadyCheck.style.display = "none";
+
+        document.addEventListener("keydown", (e) => {
+            Snake.control(e, this.state.snakes[this.socket.id], this.settings.columns, this.socket);
         });
-
-        this.playAgain.addEventListener("click", this.replay.bind(this));
-        this.settingsForm.addEventListener("submit", this.updateSettings.bind(this));*/
     },
 
     createBoard: function () {
@@ -72,7 +80,9 @@ export const GameClient = {
         this.board.style.width = this.settings.columns * this.snakeUnit;
         this.board.style.height = this.settings.rows * this.snakeUnit;
 
-        this.playAgain.style.display = "none";
+        this.btnJoinGame.style.display = "none";
+        this.btnReadyCheck.style.display = "none";
+
         for (let i = 0; i < this.settings.columns * this.settings.rows; i++) {
             let div = document.createElement("div");
             div.classList.add("grid");
@@ -86,14 +96,15 @@ export const GameClient = {
     syncState: function (state) {
         console.log('syncing state', this.state, 'into', state);
         this.state = state; // TODO: consider checking differences and reacting to changes appropriately
+        this.syncGame();
     },
 
     syncGame: function () {
         console.log('syncing game');
-        clearInterval(this.interval); // TODO: clear and reset only if necessary
+        //clearInterval(this.interval); // TODO: clear and reset only if necessary
 
         document.querySelectorAll('.grid').forEach(element => element.classList.remove('snake'));
-        
+
         Object.values(this.state.snakes).forEach(snake => {
             Snake.render(snake, this.grid);
         });
@@ -102,9 +113,9 @@ export const GameClient = {
             this.apple = Apple.renderApple(this.state.apple, this.grid);
         }
 
-        if (this.state.stateName === "playing") {
-            this.interval = setInterval(this.gameEventLoop.bind(this), this.state.intervalTime);
-        }
+        //if (this.state.stateName === "playing") {
+        //    this.interval = setInterval(this.gameEventLoop.bind(this), this.state.intervalTime);
+        //}
     },
 
     gameEventLoop: function () {
@@ -119,6 +130,14 @@ export const GameClient = {
 
     endGame: function () {
         clearInterval(this.interval);
+
+        document.removeEventListener("keydown", {});
+
+        if (this.state.snakes[this.socket.id]) {
+            this.btnReadyCheck.style.display = "inline-block";
+        } else {
+            this.checkJoin();
+        }
 
         //this.refreshScore(true);
 
@@ -192,6 +211,6 @@ export const GameClient = {
         this.endGame();
         this.createBoard();
         this.startGame();
-        this.playAgain.style.display = "none";
+        this.popup.style.display = "none";
     },
 };

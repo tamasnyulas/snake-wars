@@ -102,9 +102,13 @@ body {
 
 .popup {
     margin: 10px auto;
-    display: flex;
+    display: block;
     flex-wrap: wrap;
     text-align: center;
+
+    button {
+        display: none;
+    }
 }
 
 button.playAgain {

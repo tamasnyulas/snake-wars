@@ -88,6 +88,8 @@ export const GameServer = {
         });
 
         socket.on('ready-check', (msg) => {
+            if (!this.state.snakes[socket.id]) return;
+
             console.log('a player is ready: ', socket.id);
             this.state.snakes[socket.id].readyCheck = !!msg;
 
@@ -103,13 +105,15 @@ export const GameServer = {
         });
 
         socket.on('snake-control', (msg) => {
+            if (!this.state.snakes[socket.id]) return;
+
             let snake = this.state.snakes[socket.id];
             if (!snake.canMove) return;
 
             snake.changeDirection(msg.direction, this.settings.columns);
 
             // broadcast the new game state to the clients
-            this.io.emit('sync-state', this.state); // TODO: consider implementing a lighter solution to avoid broadcasting the entire game state
+            //this.io.emit('sync-state', this.state); // TODO: consider implementing a lighter solution to avoid broadcasting the entire game state
         });
     },
 
@@ -140,6 +144,8 @@ export const GameServer = {
     },
 
     startGame: function () {
+        this.resetSnakes();
+
         this.state.stateName = 'playing';
 
         Object.values(this.state.snakes).forEach((snake, i) => {
@@ -171,6 +177,8 @@ export const GameServer = {
             //    this.eatApple(snake);
             //}
         });
+
+        this.io.emit('sync-state', this.state);
     },
 
     endGame: function () {

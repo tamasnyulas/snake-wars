@@ -13,6 +13,8 @@ export const Snake = {
             ...options,
             currentPosition: [...options.initialPosition],
             currentDirection: options.initialDirection,
+            previousPosition: [...options.initialPosition],
+            previousDirection: options.initialDirection,
             size: options.initialPosition.size,
             currentScore: 0,
             growth: 0,
@@ -21,10 +23,13 @@ export const Snake = {
             reset: function () {
                 this.currentPosition = [...this.initialPosition];
                 this.currentDirection = this.initialDirection;
+                this.previousPosition = [...this.initialPosition];
+                this.previousDirection = this.initialDirection;
                 this.size = this.initialPosition.size;
                 this.growth = 0;
                 this.currentScore = 0;
                 this.canMove = true;
+                this.readyCheck = false;
             },
 
             score: function (value) {
@@ -54,6 +59,8 @@ export const Snake = {
 
                     return false;
                 }
+
+                this.previousPosition = [...this.currentPosition];
         
                 // Add new head
                 this.currentPosition.unshift(this.currentPosition[0] + this.currentDirection);
@@ -70,6 +77,8 @@ export const Snake = {
             },
         
             changeDirection: function (direction, columns) {
+                this.previousDirection = this.currentDirection;
+
                 if (direction === 'right' && this.currentDirection !== -1) {
                     this.currentDirection = 1;
                 } else if (direction === 'up' && this.currentDirection !== columns) {
