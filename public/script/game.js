@@ -21,6 +21,11 @@ export const Game = {
     },
     players: [
         { // player 1
+            initialPosition: [17, 18, 19], // TODO: calculate initial position based on rows and columns
+            initialDirection: -1,
+            color: 'orange',
+        },
+        { // player 2
             initialPosition: [2, 1, 0],
             initialDirection: 1,
             controlKeys: { 
@@ -30,11 +35,6 @@ export const Game = {
                 down: 's',
             },
             color: 'cornflowerblue',
-        },
-        { // player 2
-            initialPosition: [17, 18, 19], // TODO: calculate initial position based on rows and columns
-            initialDirection: -1,
-            color: 'orange',
         },
         { // player 3
             initialPosition: [(19*20)+2, (19*20)+1, (19*20)+0], // TODO: calculate initial position based on rows and columns
