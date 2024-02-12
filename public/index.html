@@ -1,14 +1,17 @@
 <html>
 <head>
     <title>Snake Wars</title>
+
     <link rel="stylesheet" type="text/css" href="style/style.css">
-    <script type="module" src="script/main.js" defer></script>
+
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script type="module" src="js/client.js" defer></script>
 </head>
 
 <body>
     <div class="side-menu">
         <div>Score Board <table class="scoreDisplay"></table></div>
-        <div>
+        <!--div>
             <p>Settings:</p>
             <form class="settingsForm" onsubmit="return false;">
                 <div class="row">
@@ -38,11 +41,12 @@
 
                 <div class="row"><button type="submit">Apply</button></div>
             </form>
-        </div>
+        </div-->
     </div>
     <div class="board"></div>
     <div class="popup">
-        <button class="playAgain">Hit ENTER to play again!</button>
+        <button class="joinGame">Join Game</button>
+        <button class="readyCheck">Ready?</button>
     </div>
 </body>
 </html>

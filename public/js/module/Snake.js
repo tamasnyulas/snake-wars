@@ -1,32 +1,23 @@
 export const Snake = {
     directionMap: {},
+    controlKeys: {
+        left: 'ArrowLeft',
+        up: 'ArrowUp',
+        right: 'ArrowRight',
+        down: 'ArrowDown',
+    },
 
-    initialize: function (snakes, columns) {
+    initialize: function (columns) {
         this.directionMap = {
             "1": "east",
             '-1': "west",
             [columns]: "south",
             ["-" + columns]: "north",
         };
-        
-        //document.addEventListener("keydown", function (e) {
-        //    Snake.control(e, snakes, columns);
-        //});
     },
 
     createSnake: function (options) {
-        const defaultOptions = {
-            initialPosition: [2, 1, 0],
-            initialDirection: 1,
-            controlKeys: {
-                left: 'ArrowLeft',
-                up: 'ArrowUp',
-                right: 'ArrowRight',
-                down: 'ArrowDown',
-            },
-            color: 'lightgray',
-        };
-
+        
         const snakeInstance = {
             ...defaultOptions,
             ...options,
@@ -53,12 +44,32 @@ export const Snake = {
         return snakeInstance;
     },
 
-    render: function (snakeInstance, grid) {
-        snakeInstance.currentPosition.forEach((index, i) => {
-            let snakePart = i === 0 ? "head" : i === snakeInstance.currentPosition.length - 1 ? "tail" : "body";
+    render: function (snakeState, grid) {
+        if (snakeState.previousPosition) {
+            snakeState.previousPosition.forEach(index => {
+                grid[index].classList.remove("head", "body", "tail", "snake");
+            });
+        }
+
+        snakeState.currentPosition.forEach((index, i) => {
+            let snakePart = i === 0 ? "head" : i === snakeState.currentPosition.length - 1 ? "tail" : "body";
+            
             grid[index].classList.add("snake", snakePart);
-            grid[index].style.backgroundColor = snakeInstance.color;
-            grid[index].dataset.direction = this.directionMap[snakeInstance.currentDirection];
+            grid[index].classList.remove("apple");
+            grid[index].style.backgroundColor = snakeState.color;
+
+            if (i === 0) {
+                // Set direction for snake head
+                grid[index].dataset.direction = this.directionMap[snakeState.currentDirection];
+            } else if (i === snakeState.currentPosition.length - 1) {
+                // Clean up direction for previous snake tail
+                const previousTailIndex = snakeState.previousPosition[snakeState.previousPosition.length - 1];
+                delete grid[previousTailIndex].dataset.direction;
+
+                // Set direction for snake tail
+                const lastBodyIndex = snakeState.currentPosition[snakeState.currentPosition.length - 2];
+                grid[index].dataset.direction = grid[lastBodyIndex].dataset.direction;
+            }
         });
     },
 
@@ -107,17 +118,21 @@ export const Snake = {
         }
     },
 
-    control: function (e, snakes, columns) {
-        snakes.forEach(snakeInstance => {
-            if (e.key === snakeInstance.controlKeys.right && snakeInstance.currentDirection !== -1) {
-                snakeInstance.currentDirection = 1;
-            } else if (e.key === snakeInstance.controlKeys.up && snakeInstance.currentDirection !== columns) {
-                snakeInstance.currentDirection = -columns;
-            } else if (e.key === snakeInstance.controlKeys.left && snakeInstance.currentDirection !== 1) {
-                snakeInstance.currentDirection = -1;
-            } else if (e.key === snakeInstance.controlKeys.down && snakeInstance.currentDirection !== -columns) {
-                snakeInstance.currentDirection = columns;
-            }
-        })
+    control: function (e, snakeInstance, columns, socket) {
+        if (!snakeInstance.canMove) return;
+
+        if (e.key === this.controlKeys.right && snakeInstance.currentDirection !== -1) {
+            snakeInstance.currentDirection = 1;
+            socket.emit('snake-control', {direction: 'right'});
+        } else if (e.key === this.controlKeys.up && snakeInstance.currentDirection !== columns) {
+            snakeInstance.currentDirection = -columns;
+            socket.emit('snake-control', {direction: 'up'})
+        } else if (e.key === this.controlKeys.left && snakeInstance.currentDirection !== 1) {
+            snakeInstance.currentDirection = -1;
+            socket.emit('snake-control', {direction: 'left'});
+        } else if (e.key === this.controlKeys.down && snakeInstance.currentDirection !== -columns) {
+            snakeInstance.currentDirection = columns;
+            socket.emit('snake-control', {direction: 'down'});
+        }
     },
 };

@@ -20,6 +20,10 @@ body {
     box-sizing: border-box
 }
 
+.snake {
+    background-color: silver;
+}
+
 /* Add direction-specific styles */
 .snake.head[data-direction="north"] {
     border-radius: 50% 50% 0 0;
@@ -98,9 +102,13 @@ body {
 
 .popup {
     margin: 10px auto;
-    display: flex;
+    display: block;
     flex-wrap: wrap;
     text-align: center;
+
+    button {
+        display: none;
+    }
 }
 
 button.playAgain {

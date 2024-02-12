@@ -11,27 +11,23 @@ export const Apple = {
             speedBomb: (Math.random() < 0.2),
         };
 
-        this.renderApple(appleInstance, grid);
-
         return appleInstance;
     },
 
     getRandomPosition: function (grid) {
-        const emptySquares = Array.from(grid).filter(grid => !grid.classList.contains("snake"));
+        const emptySquares = grid.reduce((acc, field, index) => {
+            if (field === null) {
+                acc.push(index);
+            }
+            return acc;
+        }, []);
+
         const randomIndex = Math.floor(Math.random() * emptySquares.length);
 
-        return Array.from(grid).indexOf(emptySquares[randomIndex]);
+        return emptySquares[randomIndex];
     },
 
     getColor: function (value) {
         return this.colors[value - 1];
-    },
-
-    renderApple: function (appleInstance, grid) {
-        grid[appleInstance.position].classList.add(
-            "apple",
-            appleInstance.color,
-            appleInstance.speedBomb ? "speedBomb" : null
-        );
     },
 };
