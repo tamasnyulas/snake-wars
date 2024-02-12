@@ -8,8 +8,6 @@ export const GameClient = {
     btnReadyCheck: document.querySelector(".readyCheck"),
     scoreDisplay: document.querySelector(".scoreDisplay"),
     grid: null,
-    //settingsForm: document.querySelector(".settingsForm"),
-
     apple: null,
     socket: null,
     settings: null,
@@ -31,6 +29,10 @@ export const GameClient = {
 
             // MVP
             this.checkJoin();
+        });
+
+        socket.on('disconnect', () => {
+            console.log('disconnected'); // TODO: handle disconnect
         });
 
         socket.on('sync-state', (state) => this.syncState(state));
@@ -101,7 +103,6 @@ export const GameClient = {
 
     syncGame: function () {
         console.log('syncing game');
-        //clearInterval(this.interval); // TODO: clear and reset only if necessary
 
         document.querySelectorAll('.grid').forEach(element => element.classList.remove('snake'));
 
@@ -113,24 +114,9 @@ export const GameClient = {
             this.apple = Apple.renderApple(this.state.apple, this.grid);
         }
 
-        //if (this.state.stateName === "playing") {
-        //    this.interval = setInterval(this.gameEventLoop.bind(this), this.state.intervalTime);
-        //}
-    },
-
-    gameEventLoop: function () {
-        Object.values(this.state.snakes).forEach(snake => {
-            Snake.move(snake, this.grid);
-
-            //if (this.grid[snake.currentPosition[0]].classList.contains("apple")) {
-            //    this.eatApple(snake);
-            //}
-        });
     },
 
     endGame: function () {
-        clearInterval(this.interval);
-
         document.removeEventListener("keydown", {});
 
         if (this.state.snakes[this.socket.id]) {
@@ -143,33 +129,6 @@ export const GameClient = {
 
         //this.playAgain.style.display = "flex";
         //this.playAgain.focus();
-    },
-
-    eatApple: function (snake) {
-        this.grid[snake.currentPosition[0]].classList.remove("apple");
-        snake.score(this.apple.value);
-        this.refreshScore();
-
-        if (this.apple.speedBomb) {
-            this.increaseSpeed();
-        }
-
-        this.apple = Apple.createApple(this.grid);
-    },
-
-
-
-
-
-    startGame: function () {
-        this.apple = Apple.createApple(this.grid);
-        this.intervalTime = 200;
-        this.activePlayers = Object.keys(this.state.snakes).length;
-        
-        Object.values(this.state.snakes).forEach(snake => Snake.render(snake, this.grid));
-        this.refreshScore();
-
-        this.interval = setInterval(this.gameEventLoop.bind(this), this.intervalTime); // TODO: consider changing intervals to exist per snake
     },
 
     refreshScore: function (endGame = false) {
@@ -196,21 +155,4 @@ export const GameClient = {
         return topScore
     },
 
-    increaseSpeed: function () {
-        let newIntervalTime = this.intervalTime * this.settings.speedIncrement;
-
-        if (newIntervalTime <= this.minInterval) return;
-
-        clearInterval(this.interval);
-        this.intervalTime = newIntervalTime;
-        this.interval = setInterval(this.gameEventLoop.bind(this), this.intervalTime);
-    },
-
-    replay: function () {
-        this.board.innerHTML = "";
-        this.endGame();
-        this.createBoard();
-        this.startGame();
-        this.popup.style.display = "none";
-    },
 };

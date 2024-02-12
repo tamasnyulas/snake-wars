@@ -37,29 +37,7 @@ export const Snake = {
                 this.currentScore += value;
             },
 
-            checkForHits: function (grid, columns, rows) {
-                const hitBottom = this.currentPosition[0] + columns >= columns * rows && this.currentDirection === columns;
-                const hitRight = this.currentPosition[0] % columns === columns - 1 && this.currentDirection === 1;
-                const hitLeft = this.currentPosition[0] % columns === 0 && this.currentDirection === -1;
-                const hitTop = this.currentPosition[0] - columns <= 0 && this.currentDirection === -columns;
-                const hitSnake = grid[this.currentPosition[0] + this.currentDirection] !== null;
-
-                if (hitBottom || hitRight || hitLeft || hitTop || hitSnake) {
-                    return true;
-                } else {
-                    return false;
-                }
-            },
-
-            move: function (grid, columns, rows) {
-                if (!this.canMove) return false;
-        
-                if (this.checkForHits(grid, columns, rows)) {
-                    this.canMove = false;
-
-                    return false;
-                }
-
+            move: function () {
                 this.previousPosition = [...this.currentPosition];
         
                 // Add new head
@@ -72,8 +50,22 @@ export const Snake = {
                     // Remove tail
                     this.currentPosition.pop();
                 }
+            },
 
-                return true;
+            checkForHits: function (grid, columns, rows) {
+                const hitBottom = this.currentPosition[0] + columns >= columns * rows && this.currentDirection === columns;
+                const hitRight = this.currentPosition[0] % columns === columns - 1 && this.currentDirection === 1;
+                const hitLeft = this.currentPosition[0] % columns === 0 && this.currentDirection === -1;
+                const hitTop = this.currentPosition[0] - columns <= 0 && this.currentDirection === -columns;
+                const hitSnake = grid[this.currentPosition[0] + this.currentDirection] !== null;
+
+                if (hitBottom || hitRight || hitLeft || hitTop || hitSnake) {
+                    this.canMove = false;
+
+                    return true;
+                } else {
+                    return false;
+                }
             },
         
             changeDirection: function (direction, columns) {

@@ -14,10 +14,6 @@ export const Snake = {
             [columns]: "south",
             ["-" + columns]: "north",
         };
-        
-        //document.addEventListener("keydown", function (e) {
-        //    Snake.control(e, snakes, columns);
-        //});
     },
 
     createSnake: function (options) {
@@ -55,23 +51,24 @@ export const Snake = {
             });
         }
 
-        const lastBodyIndex = snakeState.currentPosition[snakeState.currentPosition.length - 2];
-
         snakeState.currentPosition.forEach((index, i) => {
-            const previousIndex = snakeState.previousPosition[i - 1];
             let snakePart = i === 0 ? "head" : i === snakeState.currentPosition.length - 1 ? "tail" : "body";
+            
             grid[index].classList.add("snake", snakePart);
+            grid[index].classList.remove("apple");
             grid[index].style.backgroundColor = snakeState.color;
 
             if (i === 0) {
                 // Set direction for snake head
                 grid[index].dataset.direction = this.directionMap[snakeState.currentDirection];
             } else if (i === snakeState.currentPosition.length - 1) {
+                // Clean up direction for previous snake tail
+                const previousTailIndex = snakeState.previousPosition[snakeState.previousPosition.length - 1];
+                delete grid[previousTailIndex].dataset.direction;
+
                 // Set direction for snake tail
-                grid[index].dataset.direction = grid[lastBodyIndex].dataset.direction; // TODO: initial direction is not working
-            } else {
-                // Set direction for snake body
-                grid[index].dataset.direction = grid[previousIndex].dataset.direction;
+                const lastBodyIndex = snakeState.currentPosition[snakeState.currentPosition.length - 2];
+                grid[index].dataset.direction = grid[lastBodyIndex].dataset.direction;
             }
         });
     },

@@ -23,7 +23,7 @@ export const GameServer = {
         speedIncrement: 0.8,
         columns: 20,
         rows: 20,
-        players: 1,
+        players: 2,
         endEarly: true,
     },
     interval: null,
@@ -51,7 +51,6 @@ export const GameServer = {
         this.io.on('connection', (socket) => this.connectUser(socket));
 
         this.updateSettings();
-        this.createVirtualGrid();
     },
 
     connectUser: function (socket) {
@@ -111,9 +110,6 @@ export const GameServer = {
             if (!snake.canMove) return;
 
             snake.changeDirection(msg.direction, this.settings.columns);
-
-            // broadcast the new game state to the clients
-            //this.io.emit('sync-state', this.state); // TODO: consider implementing a lighter solution to avoid broadcasting the entire game state
         });
     },
 
@@ -124,7 +120,7 @@ export const GameServer = {
         });
 
         // broadcast the new game state to the clients
-        this.io.emit('sync-state', this.state);
+        this.io.emit('sync-state', this.state); // TODO: consider syncing only the changes
     },
 
     createVirtualGrid: function () {
@@ -145,6 +141,7 @@ export const GameServer = {
 
     startGame: function () {
         this.resetSnakes();
+        this.createVirtualGrid();
 
         this.state.stateName = 'playing';
 
@@ -163,22 +160,39 @@ export const GameServer = {
         this.interval = setInterval(this.gameEventLoop.bind(this), this.state.intervalTime);
     },
 
-    gameEventLoop: function () {
-        Object.values(this.state.snakes).forEach(snake => {
-            if (
-                !snake.move(this.state.grid, this.settings.columns, this.settings.rows) && 
-                (this.settings.endEarly || --this.state.activePlayers < 1)
-            ) {
-                this.endGame();
+    gameEventLoop: function () { // TODO: this function MUST work with top performance
+        Object.values(this.state.snakes).forEach((snake, i) => {
+            if (!snake.canMove) return;
+
+            let chrashed = snake.checkForHits(this.state.grid, this.settings.columns, this.settings.rows);
+
+            // TODO: when a snake chrashes, all snakes MUST stop immidiately, instead of moving one or more steps
+
+            if (!chrashed) {
+                snake.move();
+                // Update the board with the new head position
+                let headIndex = snake.currentPosition[0];
+                this.state.grid[headIndex] = i;
+
+                // If the tail left a field, set it to null
+                let previousTailIndex = snake.previousPosition[snake.previousPosition.length - 1];
+                if (previousTailIndex !== snake.currentPosition[snake.currentPosition.length - 1]) {
+                    this.state.grid[previousTailIndex] = null;
+                }
+            } else if ((this.settings.endEarly || --this.state.activePlayers < 1)) {
+                console.log('player crashed', snake.id);
+                if (this.state.stateName === 'playing'){
+                    this.endGame();  
+                } 
                 return;
             }
 
-            //if (this.state.grid[snake.currentPosition[0]].classList.contains("apple")) {
-            //    this.eatApple(snake);
-            //}
+            if (this.state.apple && snake.currentPosition[0] === this.state.apple.position) {
+                this.eatApple(snake);
+            }
         });
 
-        this.io.emit('sync-state', this.state);
+        this.io.emit('sync-state', this.state); // TODO: consider syncing only the changes
     },
 
     endGame: function () {
@@ -187,16 +201,13 @@ export const GameServer = {
         this.state.stateName = 'waiting';
         this.state.apple = null;
         this.state.activePlayers = 0;
-        //this.resetSnakes();
 
         console.log('game over');
         this.io.emit('end-game', this.state);
     },
 
     eatApple: function (snake) {
-        this.state.grid[snake.currentPosition[0]].classList.remove("apple");
         snake.score(this.state.apple.value);
-        this.refreshScore();
 
         if (this.state.apple.speedBomb) {
             this.increaseSpeed();
@@ -205,32 +216,8 @@ export const GameServer = {
         this.state.apple = Apple.createApple(this.state.grid);
     },
 
-    /*refreshScore: function (endGame = false) {
-        let topScore = this.determineTopScore();
-        this.scoreDisplay.innerHTML = "";
-
-        this.state.snakes.forEach((snake, index) => {
-            const row = document.createElement("tr");
-            row.style.color = snake.color;
-
-            if (endGame && snake.currentScore > 0 && snake.currentScore === topScore) {
-                row.classList.add("winner");
-            }
-
-            row.innerHTML = `<th>Snake ${index + 1}</th><td>${snake.currentScore}</td>`;
-            this.scoreDisplay.appendChild(row);
-        });
-    },
-
-    determineTopScore: function () {
-        let scores = this.state.snakes.map(snake => snake.currentScore);
-        let topScore = Math.max(...scores);
-        
-        return topScore
-    },*/
-
     increaseSpeed: function () {
-        let newIntervalTime = this.state.intervalTime * this.settings.speedIncrement;
+        let newIntervalTime = Math.floor(this.state.intervalTime * this.settings.speedIncrement);
 
         if (newIntervalTime <= this.minInterval) return;
 
@@ -238,15 +225,6 @@ export const GameServer = {
         this.state.intervalTime = newIntervalTime;
         this.interval = setInterval(this.gameEventLoop.bind(this), this.state.intervalTime);
     },
-
-    /*replay: function () {
-        this.board.innerHTML = "";
-        this.endGame();
-        this.resetSnakes();
-        this.createBoard();
-        this.startGame();
-        this.playAgain.style.display = "none";
-    },*/
 
     resetSnakes: function () {
         Object.values(this.state.snakes).forEach(snake => snake.reset());
