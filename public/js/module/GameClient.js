@@ -1,6 +1,15 @@
 import { Snake } from './Snake.js';
 import { Apple } from './Apple.js';
 
+/**
+ * TODO:
+ * - Show player names in the score table
+ * - Show player ready state before the game starts
+ * - Show the winner of the game
+ * - Extract game settings and game control mechanics (join, ready) into a separate module
+ * - Introduce game creation and game settings
+ */
+
 export const GameClient = {
     board: document.querySelector(".board"),
     popup: document.querySelector(".popup"),
