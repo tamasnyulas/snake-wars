@@ -16,4 +16,14 @@
  # Server side TODOs:
 
 - [ ] ...
+
+# Hosting TODOs:
+
+- [ ] Ensure that deployment is fast, and if possible, doesn't always install all dependencies from scratch.
  
+original: arn:aws:iam::533267311829:role/SnakeWarsCodeDeployRole
+
+new: arn:aws:iam::533267311829:role/service-role/codebuild-snake-wars-service-role
+
+https://eu-north-1.console.aws.amazon.com/codesuite/codebuild/projects/SnakeWarsBuildProject/edit/artifacts?region=eu-north-1
+encription key: arn:aws:kms:eu-north-1:533267311829:alias/aws/s3
