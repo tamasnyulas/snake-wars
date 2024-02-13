@@ -1,10 +1,5 @@
-artifacts:
-  files:
-    - '**/*'
-  base-directory: base_dir
-  name: BuildArtifact
-  discard-paths: no
+version: 0.2
 phases:
-  build:
+  install:
     commands:
       - npm install
