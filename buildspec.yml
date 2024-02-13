@@ -1,10 +1,4 @@
 version: 0.2
-artifacts:
-  files:
-    - '**/*'
-  base-directory: base_dir
-  name: BuildArtifact
-  discard-paths: no
 phases:
   install:
     commands:
