@@ -15,7 +15,7 @@ export const GameServer = {
         speedIncrement: 0.8,
         columns: 20,
         rows: 20,
-        players: 2,
+        players: 1,
         endEarly: true,
     },
     interval: null,

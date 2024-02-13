@@ -2,7 +2,7 @@ version: 0.2
 artifacts:
   files:
     - '**/*'
-phases:
-  install:
-    commands:
-      - npm install
+#phases:
+#  install:
+#    commands:
+#      - npm install
