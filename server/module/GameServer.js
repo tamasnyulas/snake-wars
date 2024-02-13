@@ -1,14 +1,6 @@
 import { Snake } from './Snake.js';
 import { Apple } from './Apple.js';
 
-/*
- * TODO: 
- * - As the first step, a user should be able to create a game (handling multiple games is optional).
- * - A user should be able to set the game settings through a form.
- * - When a game is created, it should have a unique, sharable URL.
- * - The game should initialize based on the settings when it's created.
- */
-
 export const GameServer = {
     io: null,
     state: {
