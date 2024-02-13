@@ -5,4 +5,4 @@ artifacts:
 phases:
   install:
     commands:
-      - npm install
+      - npm ci
