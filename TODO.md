@@ -25,10 +25,11 @@
 
 - [ ] Add validation for the submitted game settings.
 - [ ] Manage multiple games based on the unique game ID.
-- [ ] An iteration should first calculate crashes for all snakes, and only after that move them (in two separate loops).
+- [x] An iteration should first calculate crashes for all snakes, and only after that move them (in two separate loops).
+- [ ] Ensure that `GameServer.gameEventLoop()` works highly efficiently with top performance.
 
 # Hosting TODOs:
 
 - [x] Ensure that deployment is fast, and if possible, doesn't always install all dependencies from scratch.
-- [ ] Consider using CodePipeline v1 for unlimited free deployments.
+- [x] Consider using CodePipeline v1 for unlimited free deployments.
  

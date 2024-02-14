@@ -73,51 +73,6 @@ export const Snake = {
         });
     },
 
-    move: function (snakeInstance, grid) {
-        if (!snakeInstance.canMove) return;
-
-        let tail = snakeInstance.currentPosition[snakeInstance.currentPosition.length - 1];
-
-        // Add new head
-        snakeInstance.currentPosition.unshift(snakeInstance.currentPosition[0] + snakeInstance.currentDirection);
-        grid[snakeInstance.currentPosition[0]].classList.add("snake", "head");
-        grid[snakeInstance.currentPosition[0]].style.backgroundColor = snakeInstance.color;
-        grid[snakeInstance.currentPosition[0]].dataset.direction = this.directionMap[snakeInstance.currentDirection];
-        grid[snakeInstance.currentPosition[1]].classList.replace("head", "body");
-        
-        if (snakeInstance.growth > 0) {
-            // Grow snake
-            grid[tail].classList.replace("body", "tail");
-            snakeInstance.growth--;
-        } else {
-            // Remove tail
-            snakeInstance.currentPosition.pop();
-            grid[tail].classList.remove("snake", "head", "body", "tail");
-            grid[tail].style.backgroundColor = '';
-            delete grid[tail].dataset.direction;
-
-            // define new tail
-            grid[snakeInstance.currentPosition[snakeInstance.currentPosition.length - 1]].classList.replace("body", "tail");
-            grid[snakeInstance.currentPosition[snakeInstance.currentPosition.length - 1]].dataset.direction = grid[snakeInstance.currentPosition[snakeInstance.currentPosition.length - 2]].dataset.direction;
-        }
-    },
-
-    checkForHits: function (snakeInstance, grid, columns, rows) {
-        if (!snakeInstance.canMove) return false;
-
-        const hitBottom = snakeInstance.currentPosition[0] + columns >= columns * rows && snakeInstance.currentDirection === columns;
-        const hitRight = snakeInstance.currentPosition[0] % columns === columns - 1 && snakeInstance.currentDirection === 1;
-        const hitLeft = snakeInstance.currentPosition[0] % columns === 0 && snakeInstance.currentDirection === -1;
-        const hitTop = snakeInstance.currentPosition[0] - columns <= 0 && snakeInstance.currentDirection === -columns;
-        const hitSelf = grid[snakeInstance.currentPosition[0] + snakeInstance.currentDirection]?.classList.contains("snake");
-
-        if (hitBottom || hitRight || hitLeft || hitTop || hitSelf) {
-            return true;
-        } else {
-            return false;
-        }
-    },
-
     control: function (e, snakeInstance, columns, socket) {
         if (!snakeInstance.canMove) return;
 

@@ -98,7 +98,8 @@ export const GameServer = {
         socket.on('snake-control', (msg) => {
             if (!this.state.snakes[socket.id]) return;
 
-            let snake = this.state.snakes[socket.id];
+            const snake = this.state.snakes[socket.id];
+
             if (!snake.canMove) return;
 
             snake.changeDirection(msg.direction, this.settings.columns);
@@ -150,34 +151,37 @@ export const GameServer = {
         this.interval = setInterval(this.gameEventLoop.bind(this), this.state.intervalTime);
     },
 
-    gameEventLoop: function () { // TODO: this function MUST work with top performance
+    gameEventLoop: function () {
+        let chrashed = false;
+
         Object.values(this.state.snakes).forEach((snake, i) => {
             if (!snake.canMove) return;
 
-            let chrashed = snake.checkForHits(this.state.grid, this.settings.columns, this.settings.rows);
+            if (snake.checkForHits(this.state.grid, this.settings.columns, this.settings.rows)) {
+                this.state.activePlayers--;
+                chrashed = true;
+            }
+        });
 
-            // TODO: when a snake chrashes, all snakes MUST stop immidiately, instead of moving one or more steps
+        if (chrashed && (this.settings.endEarly || this.state.activePlayers < 1)) {
+            this.endGame();
 
-            if (!chrashed) {
-                snake.move();
-                // Update the board with the new head position
-                let headIndex = snake.currentPosition[0];
-                this.state.grid[headIndex] = i;
+            return;
+        }
 
-                // If the tail left a field, set it to null
-                let previousTailIndex = snake.previousPosition[snake.previousPosition.length - 1];
-                if (previousTailIndex !== snake.currentPosition[snake.currentPosition.length - 1]) {
-                    this.state.grid[previousTailIndex] = null;
-                }
-            } else if ((this.settings.endEarly || --this.state.activePlayers < 1)) {
-                console.log('player crashed', snake.id);
-                if (this.state.stateName === 'playing'){
-                    this.endGame();  
-                } 
-                return;
+        Object.values(this.state.snakes).forEach((snake, i) => {
+            if (!snake.canMove) return;
+
+            const headIndex = snake.move();
+            this.state.grid[headIndex] = i;
+
+            // If the tail left a field, set it to null
+            let previousTailIndex = snake.previousPosition[snake.previousPosition.length - 1];
+            if (previousTailIndex !== snake.currentPosition[snake.currentPosition.length - 1]) {
+                this.state.grid[previousTailIndex] = null;
             }
 
-            if (this.state.apple && snake.currentPosition[0] === this.state.apple.position) {
+            if (this.state.apple && headIndex === this.state.apple.position) {
                 this.eatApple(snake);
             }
         });
