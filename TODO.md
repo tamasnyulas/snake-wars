@@ -7,20 +7,25 @@
 - [ ] Handle different log levels for development and production.
 - [ ] Refactor and clean up the code based on best practices.
 - [ ] List the available games on the lobby page.
+- [ ] Sync data should only contain what changed, instead of pushing everything.
+- [ ] Fix quick turning issues, so it doesn't feel like a missed action.
  
  # Client side TODOs:
 
+- [ ] Make the game mobile friendly.
 - [ ] Show player names in the score table.
 - [ ] Show player ready state before the game starts.
 - [ ] Show the winner of the game.
 - [ ] Extract game settings and game control mechanics (join, ready) into a separate module.
 - [x] Introduce game creation and game settings.
 - [ ] Make the UI nicer.
+- [ ] Add loading indicator to handle laggy actions.
  
  # Server side TODOs:
 
 - [ ] Add validation for the submitted game settings.
 - [ ] Manage multiple games based on the unique game ID.
+- [ ] An iteration should first calculate crashes for all snakes, and only after that move them (in two separate loops).
 
 # Hosting TODOs:
 

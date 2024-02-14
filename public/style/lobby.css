@@ -1,0 +1,60 @@
+
+
+
+/* Styles for mobile */
+@media (max-width: 1000px) {
+    .lobby {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .lobbyLeft, .lobbyCenter, .lobbyRight {
+        margin: 5px;
+    }
+}
+
+/* Styles for desktop */
+@media (min-width: 1001px) {
+    .lobby {
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .lobbyLeft, .lobbyCenter, .lobbyRight {
+        margin: 20px;
+    }
+}
+
+.lobbyLeft, .lobbyCenter, .lobbyRight {
+    margin: 10px;
+}
+
+.lobbyCenter {
+    width: 50px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+}
+
+.lobbyLeft,
+.lobbyRight {
+    flex-grow: 1;
+    text-align: center;
+}
+
+
+.settingsForm {
+    padding: 0 0 0 20px;
+}
+
+.settingsForm label{
+    display: inline-block;
+}
+
+.settingsForm .row {
+    display: block;
+    margin: 10px 0 5px 0;
+}

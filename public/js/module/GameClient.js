@@ -53,6 +53,20 @@ export const GameClient = {
 
         this.btnJoinGame.addEventListener("click", this.joinGame.bind(this));
         this.btnReadyCheck.addEventListener("click", this.readyCheck.bind(this));
+
+        // TODO: move this to a separate function
+        // TODO: ensure that non-players can't control the game
+        document.addEventListener("keydown", (e) => {
+            Snake.control(e, this.state.snakes[this.socket.id], this.settings.columns, this.socket);
+        });
+
+        ["up", "down", "left", "right"].forEach(direction => {
+            const button = document.querySelector("." + direction);
+            button.addEventListener("click", () => {
+                const event = new KeyboardEvent("keydown", { key: "Arrow" + direction.charAt(0).toUpperCase() + direction.slice(1) });
+                document.dispatchEvent(event);
+            });
+        });
     },
 
     // TODO: This should be called when a user joins or leaves the game
@@ -71,10 +85,6 @@ export const GameClient = {
         this.socket.emit('ready-check', true);
 
         this.btnReadyCheck.style.display = "none";
-
-        document.addEventListener("keydown", (e) => {
-            Snake.control(e, this.state.snakes[this.socket.id], this.settings.columns, this.socket);
-        });
     },
 
     createBoard: function () {
@@ -117,8 +127,6 @@ export const GameClient = {
     },
 
     endGame: function () {
-        document.removeEventListener("keydown", {});
-
         if (this.state.snakes[this.socket.id]) {
             this.btnReadyCheck.style.display = "inline-block";
         } else {
