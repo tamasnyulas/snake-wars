@@ -123,8 +123,8 @@ table.scoreDisplay {
     }
 }
 
-.control-panel {
-    display: none; /* Hide the control panel on desktop */
+.touchControlPanel {
+    display: none; /* Hide the control panel by default, show it with JS when necessary */
 
     width: 200px;
     height: 200px;
@@ -134,44 +134,35 @@ table.scoreDisplay {
     bottom: 20px;
     right: 20px;
     z-index: 999;
-}
 
-.control-panel .button {
-    position: absolute;
-    width: 40%;
-    height: 40%;
-    border-radius: 50%;
-
-    &.up {
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-    }
+    .button {
+        position: absolute;
+        width: 40%;
+        height: 40%;
+        border-radius: 50%;
     
-    &.down {
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
+        &.up {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        &.down {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        &.left {
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+        }
+        
+        &.right {
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+        }
     }
-    
-    &.left {
-        top: 50%;
-        left: 0;
-        transform: translateY(-50%);
-    }
-    
-    &.right {
-        top: 50%;
-        right: 0;
-        transform: translateY(-50%);
-    }
-}
-
-/* Add styles for touch screens */
-@media (hover: none) {
-
-    .control-panel {
-        display: block; /* Show the control panel on mobile */
-    }
-    
 }

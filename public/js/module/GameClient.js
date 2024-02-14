@@ -7,6 +7,8 @@ export const GameClient = {
     btnJoinGame: document.querySelector(".joinGame"),
     btnReadyCheck: document.querySelector(".readyCheck"),
     scoreDisplay: document.querySelector(".scoreDisplay"),
+    touchControlPanel: document.querySelector(".touchControlPanel"),
+    isTouchScreen: 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0,
     grid: null,
     apple: null,
     socket: null,
@@ -51,27 +53,36 @@ export const GameClient = {
             this.endGame();
         });
 
+        this.bindControlEventListeners();
+    },
+
+    bindControlEventListeners: function () {
         this.btnJoinGame.addEventListener("click", this.joinGame.bind(this));
         this.btnReadyCheck.addEventListener("click", this.readyCheck.bind(this));
 
-        // TODO: move this to a separate function
         // TODO: ensure that non-players can't control the game
         document.addEventListener("keydown", (e) => {
             Snake.control(e, this.state.snakes[this.socket.id], this.settings.columns, this.socket);
         });
 
-        ["up", "down", "left", "right"].forEach(direction => {
-            const button = document.querySelector("." + direction);
-            button.addEventListener("click", () => {
-                const event = new KeyboardEvent("keydown", { key: "Arrow" + direction.charAt(0).toUpperCase() + direction.slice(1) });
-                document.dispatchEvent(event);
+        if (this.isTouchScreen) {
+            ["up", "down", "left", "right"].forEach(direction => {
+                const button = document.querySelector("." + direction);
+                button.addEventListener("click", () => {
+                    const event = new KeyboardEvent("keydown", { key: "Arrow" + direction.charAt(0).toUpperCase() + direction.slice(1) });
+                    document.dispatchEvent(event);
+                });
             });
-        });
+        }
     },
 
     // TODO: This should be called when a user joins or leaves the game
     checkJoin: function () {
-        this.btnJoinGame.style.display = (Object.keys(this.state.snakes).length < this.settings.players) ? "inline-block" : "none";
+        const canJoin = (Object.keys(this.state.snakes).length < this.settings.players);
+        this.btnJoinGame.style.display = canJoin ? "inline-block" : "none";
+        if (canJoin) {
+            this.btnJoinGame.focus();
+        }
     },
 
     joinGame: function () {
@@ -79,6 +90,11 @@ export const GameClient = {
 
         this.btnJoinGame.style.display = "none";
         this.btnReadyCheck.style.display = "inline-block";
+        this.btnReadyCheck.focus();
+        
+        if (this.isTouchScreen) {
+            this.touchControlPanel.style.display = "block";
+        }
     },
 
     readyCheck: function () {
@@ -134,9 +150,6 @@ export const GameClient = {
         }
 
         //this.refreshScore(true);
-
-        //this.playAgain.style.display = "flex";
-        //this.playAgain.focus();
     },
 
     refreshScore: function (endGame = false) {

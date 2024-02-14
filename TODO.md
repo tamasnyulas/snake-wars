@@ -12,7 +12,7 @@
  
  # Client side TODOs:
 
-- [ ] Make the game mobile friendly.
+- [x] Make the game mobile friendly.
 - [ ] Show player names in the score table.
 - [ ] Show player ready state before the game starts.
 - [ ] Show the winner of the game.
@@ -30,4 +30,5 @@
 # Hosting TODOs:
 
 - [x] Ensure that deployment is fast, and if possible, doesn't always install all dependencies from scratch.
+- [ ] Consider using CodePipeline v1 for unlimited free deployments.
  
