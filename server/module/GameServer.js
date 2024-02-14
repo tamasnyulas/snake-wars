@@ -36,13 +36,13 @@ export const GameServer = {
         },
     ],
 
-    initialize: function (io) {
+    initialize: function (io, settings) {
         this.io = io;
 
         // Listen for incoming socket.io connections
         this.io.on('connection', (socket) => this.connectUser(socket));
 
-        this.updateSettings();
+        this.updateSettings(settings);
     },
 
     connectUser: function (socket) {
@@ -119,14 +119,12 @@ export const GameServer = {
         this.state.grid = Array.from({ length: this.settings.columns * this.settings.rows }, (_, i) => null);
     },
 
-    updateSettings: function () {
-        // TODO: get settings from the game creation parameters
-
-        /*this.settings.speedIncrement = parseFloat(this.settingsForm.speedIncrement.value);
-        this.settings.columns = parseInt(this.settingsForm.columns.value);
-        this.settings.rows = parseInt(this.settingsForm.rows.value);
-        this.settings.players = parseInt(this.settingsForm.players.value);
-        this.settings.endEarly = this.settingsForm.endEarly.checked;*/
+    updateSettings: function (settings) {
+        this.settings.speedIncrement = parseFloat(settings.speedIncrement);
+        this.settings.columns = parseInt(settings.columns);
+        this.settings.rows = parseInt(settings.rows);
+        this.settings.players = parseInt(settings.players);
+        this.settings.endEarly = settings.endEarly ? true : false;
 
         //Snake.initialize(this.state.snakes, this.settings.columns);
     },

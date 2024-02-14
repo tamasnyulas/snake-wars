@@ -1,21 +1,26 @@
 # General TODOs:
 
-- [ ] As the first step, a user should be able to create a game (handling multiple games is optional).
-- [ ] A user should be able to set the game settings through a form.
+- [x] As the first step, a user should be able to create a game (handling multiple games is optional).
+- [x] A user should be able to set the game settings through a form.
 - [ ] When a game is created, it should have a unique, sharable URL.
-- [ ] The game should initialize based on the settings when it's created.
+- [x] The game should initialize based on the settings when it's created.
+- [ ] Handle different log levels for development and production.
+- [ ] Refactor and clean up the code based on best practices.
+- [ ] List the available games on the lobby page.
  
  # Client side TODOs:
 
-- [ ] Show player names in the score table
-- [ ] Show player ready state before the game starts
-- [ ] Show the winner of the game
-- [ ] Extract game settings and game control mechanics (join, ready) into a separate module
-- [ ] Introduce game creation and game settings
+- [ ] Show player names in the score table.
+- [ ] Show player ready state before the game starts.
+- [ ] Show the winner of the game.
+- [ ] Extract game settings and game control mechanics (join, ready) into a separate module.
+- [x] Introduce game creation and game settings.
+- [ ] Make the UI nicer.
  
  # Server side TODOs:
 
-- [ ] ...
+- [ ] Add validation for the submitted game settings.
+- [ ] Manage multiple games based on the unique game ID.
 
 # Hosting TODOs:
 

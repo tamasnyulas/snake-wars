@@ -122,7 +122,6 @@ button.playAgain {
 
 .settingsForm label{
     display: inline-block;
-    width: 80px;
 }
 
 .settingsForm .row {
@@ -145,4 +144,22 @@ table.scoreDisplay {
     .winner {
         background-color: rgb(116, 191, 116);
     }
+}
+
+div.lobby {
+    display: flex;
+    justify-content: center;
+}
+
+div.lobbyCenter {
+    width: 50px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+}
+
+div.lobbyLeft,
+div.lobbyRight {
+    flex-grow: 1;
+    text-align: center;
 }

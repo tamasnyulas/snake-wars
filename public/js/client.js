@@ -5,6 +5,4 @@ document.addEventListener("DOMContentLoaded", function () {
     const socket = io();
 
     GameClient.initialize(socket);
-
-    //GameClient.startGame();
 });
