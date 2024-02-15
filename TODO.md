@@ -13,13 +13,17 @@
  # Client side TODOs:
 
 - [x] Make the game mobile friendly.
-- [ ] Show player names in the score table.
-- [ ] Show player ready state before the game starts.
-- [ ] Show the winner of the game.
+- [x] Show player names in the score table.
+- [x] Show player ready state before the game starts.
+- [x] Show the winner of the game.
 - [ ] Extract game settings and game control mechanics (join, ready) into a separate module.
 - [x] Introduce game creation and game settings.
+- [ ] Use HTML5 transitions to smooth out snake movement.
 - [ ] Make the UI nicer.
 - [ ] Add loading indicator to handle laggy actions.
+- [ ] Fix rendering of the initial snake tail.
+- [ ] Fix failing websocket connections before joining a game.
+- [ ] Optimize score display rendering.
  
  # Server side TODOs:
 
@@ -27,6 +31,7 @@
 - [ ] Manage multiple games based on the unique game ID.
 - [x] An iteration should first calculate crashes for all snakes, and only after that move them (in two separate loops).
 - [ ] Ensure that `GameServer.gameEventLoop()` works highly efficiently with top performance.
+- [ ] Consider validating and sanitizing user settings (name, color) when a user joins the game.
 
 # Hosting TODOs:
 

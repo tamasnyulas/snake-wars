@@ -20,6 +20,8 @@ export const Snake = {
             currentScore: 0,
             growth: 0,
             canMove: true,
+            username: options.username ?? 'Anonymous',
+            color: options.color ?? null,
             
             reset: function () {
                 this.currentPosition = [...this.initialPosition];

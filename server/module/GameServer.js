@@ -54,14 +54,14 @@ export const GameServer = {
         });
 
         // set up server event listeners
-        socket.on('join-game', (msg) => { // TODO: get player name from msg
-            console.log('a player joined the game', socket.id);
+        socket.on('join-game', (preferences) => { // TODO: validate and sanitize options
+            console.log('a player joined the game', socket.id, preferences);
 
             // return early if the game is already full
             if (Object.keys(this.state.snakes).length >= this.settings.players) return;
 
             // create a new snake for this user
-            this.createSnake(socket);
+            this.createSnake(socket, preferences);
         });
 
         socket.on('disconnect', () => {
@@ -92,6 +92,8 @@ export const GameServer = {
                 console.log('all players are ready, starting the game.');
 
                 this.startGame(); // FIXME: provide data as necessary
+            } else {
+                this.syncState();
             }
         });
 
@@ -106,14 +108,19 @@ export const GameServer = {
         });
     },
 
-    createSnake: function (socket) {
+    syncState: function () {
+        this.io.emit('sync-state', this.state); // TODO: consider syncing only the changes
+    },
+
+    createSnake: function (socket, preferences) {
         this.state.snakes[socket.id] = Snake.createSnake({
             ...this.players[Object.keys(this.state.snakes).length], // TODO: calculate player initial position dynamically
             id: socket.id,
+            username: preferences.username,
         });
 
         // broadcast the new game state to the clients
-        this.io.emit('sync-state', this.state); // TODO: consider syncing only the changes
+        this.syncState();
     },
 
     createVirtualGrid: function () {
@@ -186,7 +193,7 @@ export const GameServer = {
             }
         });
 
-        this.io.emit('sync-state', this.state); // TODO: consider syncing only the changes
+        this.syncState();
     },
 
     endGame: function () {

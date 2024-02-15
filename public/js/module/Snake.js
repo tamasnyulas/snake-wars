@@ -27,6 +27,8 @@ export const Snake = {
             currentScore: 0,
             growth: 0,
             canMove: true,
+            username: options.username,
+            color: options.color,
             reset: function () {
                 this.currentPosition = [...this.initialPosition];
                 this.currentDirection = this.initialDirection;

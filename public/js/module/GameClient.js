@@ -4,7 +4,8 @@ import { Apple } from './Apple.js';
 export const GameClient = {
     board: document.querySelector(".board"),
     popup: document.querySelector(".popup"),
-    btnJoinGame: document.querySelector(".joinGame"),
+    joinGameForm: document.querySelector(".joinGameForm"),
+    usernameInput: document.querySelector("input[name='username']"),
     btnReadyCheck: document.querySelector(".readyCheck"),
     scoreDisplay: document.querySelector(".scoreDisplay"),
     touchControlPanel: document.querySelector(".touchControlPanel"),
@@ -57,11 +58,13 @@ export const GameClient = {
     },
 
     bindControlEventListeners: function () {
-        this.btnJoinGame.addEventListener("click", this.joinGame.bind(this));
+        this.joinGameForm.addEventListener("submit", this.joinGame.bind(this));
         this.btnReadyCheck.addEventListener("click", this.readyCheck.bind(this));
 
         // TODO: ensure that non-players can't control the game
         document.addEventListener("keydown", (e) => {
+            if (this.state.stateName !== "playing") return;
+
             Snake.control(e, this.state.snakes[this.socket.id], this.settings.columns, this.socket);
         });
 
@@ -79,16 +82,25 @@ export const GameClient = {
     // TODO: This should be called when a user joins or leaves the game
     checkJoin: function () {
         const canJoin = (Object.keys(this.state.snakes).length < this.settings.players);
-        this.btnJoinGame.style.display = canJoin ? "inline-block" : "none";
+        this.joinGameForm.style.display = canJoin ? "inline-block" : "none";
         if (canJoin) {
-            this.btnJoinGame.focus();
+            this.usernameInput.focus();
         }
     },
 
-    joinGame: function () {
-        this.socket.emit('join-game', {name: this.socket.id});
+    joinGame: function (e) {
+        e.preventDefault();
 
-        this.btnJoinGame.style.display = "none";
+        if (!this.usernameInput.checkValidity()) {
+            this.usernameInput.reportValidity();
+            return;
+        } 
+        
+        this.socket.emit('join-game', {
+            username: this.usernameInput.value,
+        });
+
+        this.joinGameForm.style.display = "none";
         this.btnReadyCheck.style.display = "inline-block";
         this.btnReadyCheck.focus();
         
@@ -108,7 +120,7 @@ export const GameClient = {
         this.board.style.width = this.settings.columns * this.snakeUnit;
         this.board.style.height = this.settings.rows * this.snakeUnit;
 
-        this.btnJoinGame.style.display = "none";
+        this.joinGameForm.style.display = "none";
         this.btnReadyCheck.style.display = "none";
 
         for (let i = 0; i < this.settings.columns * this.settings.rows; i++) {
@@ -136,6 +148,7 @@ export const GameClient = {
             this.apple = Apple.renderApple(this.state.apple, this.grid);
         }
 
+        this.refreshScore(false);
     },
 
     endGame: function () {
@@ -145,7 +158,7 @@ export const GameClient = {
             this.checkJoin();
         }
 
-        //this.refreshScore(true);
+        this.refreshScore(true);
     },
 
     refreshScore: function (endGame = false) {
@@ -160,7 +173,14 @@ export const GameClient = {
                 row.classList.add("winner");
             }
 
-            row.innerHTML = `<th>Snake ${index + 1}</th><td>${snake.currentScore}</td>`;
+            let username = encodeURIComponent(snake.username);
+            if (this.state.stateName === "waiting")  {
+                const readyCheck = snake.readyCheck ? " (ready)" : "";
+                username += ` ${readyCheck}`;
+            }
+
+            // TODO: add color to each name identical to their snakes
+            row.innerHTML = `<th>${username}</th><td>${snake.currentScore}</td>`;
             this.scoreDisplay.appendChild(row);
         });
     },
