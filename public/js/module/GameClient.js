@@ -122,16 +122,12 @@ export const GameClient = {
     },
 
     syncState: function (state) {
-        console.log('syncing state', this.state, 'into', state);
+        console.log('syncing new state', state);
         this.state = state; // TODO: consider checking differences and reacting to changes appropriately
         this.syncGame();
     },
 
     syncGame: function () {
-        console.log('syncing game');
-
-        document.querySelectorAll('.grid').forEach(element => element.classList.remove('snake'));
-
         Object.values(this.state.snakes).forEach(snake => {
             Snake.render(snake, this.grid);
         });

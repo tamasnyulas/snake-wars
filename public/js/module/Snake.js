@@ -45,6 +45,8 @@ export const Snake = {
     },
 
     render: function (snakeState, grid) {
+        if (!snakeState.canMove) return;
+
         if (snakeState.previousPosition) {
             snakeState.previousPosition.forEach(index => {
                 grid[index].classList.remove("head", "body", "tail", "snake");
