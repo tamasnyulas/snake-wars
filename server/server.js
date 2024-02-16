@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
+import path from 'path';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -9,15 +10,15 @@ import { GameServer } from './module/GameServer.js';
 dotenv.config();
 const app = express();
 const httpServer = createServer(app);
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __rootdir = path.resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 // Set "public" directory as the root for public resources
-app.use(express.static(join(__dirname, '../public'))); // TODO: this doesn't seem to work when it comes to html file references
+app.use(express.static(join(__rootdir, '/public'))); // TODO: this doesn't seem to work when it comes to html file references
 app.use(express.urlencoded({ extended: true }));
 
 // Serve the game lobby page
 app.get('/', (req, res) => {
-    res.sendFile(join(__dirname, '../public/lobby.html'));
+    res.sendFile(join(__rootdir, '/public/lobby.html'));
 });
 
 // Create a new game and redirect to the game's URL
@@ -53,7 +54,7 @@ app.get('/play/:gameId', (req, res) => {
 
         GameServer.initialize(io, formData);
 
-        res.sendFile(join(__dirname, '../public/game.html'));
+        res.sendFile(join(__rootdir, 'public/game.html'));
     } catch (error) {
         // TODO: send some error message to the client
         console.error('Error:', error);

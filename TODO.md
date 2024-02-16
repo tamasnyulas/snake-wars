@@ -9,6 +9,10 @@
 - [ ] List the available games on the lobby page.
 - [ ] Sync data should only contain what changed, instead of pushing everything.
 - [ ] Fix quick turning issues, so it doesn't feel like a missed action.
+- [ ] Provide color selection before joining the game.
+- [ ] Introduce special apple effects (e.g. ethernal, bullet time, mass slow, mass haste, etc.).
+- [ ] Introduce game modes (e.g. Death match, Team death match, Capture the flag, etc.).
+- [ ] Provide description on the game creation UI, to understand apple effects, apple values and game modes.
  
  # Client side TODOs:
 

@@ -71,7 +71,7 @@ export const Snake = {
                 const hitRight = this.currentPosition[0] % columns === columns - 1 && direction === 1;
                 const hitLeft = this.currentPosition[0] % columns === 0 && direction === -1;
                 const hitTop = this.currentPosition[0] - columns <= 0 && direction === -columns;
-                const hitSnake = grid[this.currentPosition[0] + direction] !== null;
+                const hitSnake = grid[this.currentPosition[0] + direction] !== 0;
 
                 if (hitBottom || hitRight || hitLeft || hitTop || hitSnake) {
                     this.canMove = false;

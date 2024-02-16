@@ -1,5 +1,6 @@
 import { Snake } from './Snake.js';
 import { Apple } from './Apple.js';
+import { GameState } from './GameState.js';
 
 export const GameClient = {
     board: document.querySelector(".board"),
@@ -14,7 +15,7 @@ export const GameClient = {
     apple: null,
     socket: null,
     settings: null,
-    state: null,
+    state: new GameState(),
     snakeUnit: 20,
 
     initialize: function (socket) {
@@ -40,6 +41,8 @@ export const GameClient = {
 
         socket.on('sync-state', (state) => this.syncState(state));
 
+        socket.on('sync-state-diff', (stateDiff) => this.syncStateDiff(stateDiff));
+
         socket.on('start-game', (state) => {
             console.log('The game is starting');
             this.createBoard();
@@ -63,7 +66,7 @@ export const GameClient = {
 
         // TODO: ensure that non-players can't control the game
         document.addEventListener("keydown", (e) => {
-            if (this.state.stateName !== "playing") return;
+            if (this.state.stateName !== GameState.STATE_NAME.PLAYING) return;
 
             Snake.control(e, this.state.snakes[this.socket.id], this.settings.columns, this.socket);
         });
@@ -115,6 +118,7 @@ export const GameClient = {
         this.btnReadyCheck.style.display = "none";
     },
 
+    // TODO: There's a glitch regarding the snake tail rendering on the initial position
     createBoard: function () {
         this.board.innerHTML = "";
         this.board.style.width = this.settings.columns * this.snakeUnit;
@@ -135,7 +139,13 @@ export const GameClient = {
 
     syncState: function (state) {
         console.log('syncing new state', state);
-        this.state = state; // TODO: consider checking differences and reacting to changes appropriately
+        this.state = new GameState(state);
+        this.syncGame();
+    },
+
+    syncStateDiff: function (stateDiff) {
+        console.log('syncing new state diff', stateDiff);
+        this.state.mergeDiff(stateDiff);
         this.syncGame();
     },
 
@@ -174,7 +184,7 @@ export const GameClient = {
             }
 
             let username = encodeURIComponent(snake.username);
-            if (this.state.stateName === "waiting")  {
+            if (this.state.stateName === GameState.STATE_NAME.WAITING)  {
                 const readyCheck = snake.readyCheck ? " (ready)" : "";
                 username += ` ${readyCheck}`;
             }

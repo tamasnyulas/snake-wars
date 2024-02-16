@@ -16,7 +16,7 @@ export const Apple = {
 
     getRandomPosition: function (grid) {
         const emptySquares = grid.reduce((acc, field, index) => {
-            if (field === null) {
+            if (field === 0) {
                 acc.push(index);
             }
             return acc;
