@@ -3,41 +3,28 @@ import { Apple } from './Apple.js';
 import { GameState } from './GameState.js';
 
 export const GameClient = {
-    board: document.querySelector(".board"),
+    canvasContainer: document.querySelector(".canvasContainer"),
+    touchControlPanel: document.querySelector(".touchControlPanel"),
     popup: document.querySelector(".popup"),
     joinGameForm: document.querySelector(".joinGameForm"),
     usernameInput: document.querySelector("input[name='username']"),
     btnReadyCheck: document.querySelector(".readyCheck"),
     scoreDisplay: document.querySelector(".scoreDisplay"),
     isTouchScreen: 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0,
-    //grid: null,
     socket: null,
     settings: null,
     state: new GameState(),
     snakeUnit: 20,
-    touchControlPanel: document.querySelector(".touchControlPanel"),
-    canvasContainer: document.querySelector(".canvasContainer"),
-    /*canvas: document.querySelector("#gameCanvas"),
-    appleCanvas: document.querySelector("#appleCanvas"),
-    canvasContext: null,
-    appleCanvasContext: null,*/
 
     initialize: function (socket) {
         this.socket = socket;
-        //this.canvasContext = this.canvas.getContext("2d");
-        //this.appleCanvasContext = this.appleCanvas.getContext("2d");
 
         // Set up client event listeners
         socket.on('connected', (response) => {
             console.log('connected', response);
             this.settings = response.settings;
             Snake.initialize(this.settings.columns, this.settings.columns * this.snakeUnit, this.settings.rows * this.snakeUnit, this.canvasContainer);
-            Apple.initiCanvas(this.settings.columns * this.snakeUnit, this.settings.rows * this.snakeUnit, this.canvasContainer);
-
-            /*this.canvas.width = this.settings.columns * this.snakeUnit;
-            this.canvas.height = this.settings.rows * this.snakeUnit;
-            this.appleCanvas.width = this.settings.columns * this.snakeUnit;
-            this.appleCanvas.height = this.settings.rows * this.snakeUnit;*/
+            Apple.initialize(this.settings.columns * this.snakeUnit, this.settings.rows * this.snakeUnit, this.canvasContainer);
 
             this.createBoard();
             this.syncState(response.state);
@@ -129,23 +116,11 @@ export const GameClient = {
 
     // TODO: There's a glitch regarding the snake tail rendering on the initial position
     createBoard: function () {
-        /*this.board.innerHTML = "";
-        this.board.style.width = this.settings.columns * this.snakeUnit;
-        this.board.style.height = this.settings.rows * this.snakeUnit;*/
         this.canvasContainer.style.width = this.settings.columns * this.snakeUnit;
         this.canvasContainer.style.height = this.settings.rows * this.snakeUnit;
 
         this.joinGameForm.style.display = "none";
         this.btnReadyCheck.style.display = "none";
-
-        /*for (let i = 0; i < this.settings.columns * this.settings.rows; i++) {
-            let div = document.createElement("div");
-            div.classList.add("grid");
-            div.style.width = this.snakeUnit;
-            div.style.height = this.snakeUnit;
-            this.board.appendChild(div);
-        }
-        this.grid = document.querySelectorAll(".grid");*/
     },
 
     syncState: function (state) {
@@ -161,7 +136,6 @@ export const GameClient = {
     },
 
     syncGame: function () {
-        
         for (const [id, snakeState] of Object.entries(this.state.snakes)) {
             Snake.render(snakeState, id, this.settings.columns);
         };

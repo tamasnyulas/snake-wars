@@ -70,7 +70,6 @@ export const Snake = {
 
         let frame = 0;
         let frames = 200 / 1000 * 60; // 60 frames per second, FIX the hardcoded time (200) according the game speed
-        canvasContext.fillStyle = 'red'; // FIX the hardcoded color
 
         requestAnimationFrame(animate);
 
@@ -78,6 +77,7 @@ export const Snake = {
             canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height);
 
             snakeState.currentPosition.forEach((index, i) => {
+                
                 const { x: xTo, y: yTo } = getCoordinatesFromIndex(index, gridSize);
                 let params = {
                     xFrom: xTo,
@@ -92,6 +92,7 @@ export const Snake = {
                     params.yFrom = yFrom;
                 }
                 
+                canvasContext.fillStyle = i % 2 === 0 ? '#F5F5F5' : '#CFCFCF'; // FIX the hardcoded color
                 drawSnakePart(params);
 
                 /*let snakePart = i === 0 ? "head" : i === snakeState.currentPosition.length - 1 ? "tail" : "body";

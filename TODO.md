@@ -7,7 +7,7 @@
 - [ ] Handle different log levels for development and production.
 - [ ] Refactor and clean up the code based on best practices.
 - [ ] List the available games on the lobby page.
-- [ ] Sync data should only contain what changed, instead of pushing everything.
+- [x] Sync data should only contain what changed, instead of pushing everything.
 - [ ] Fix quick turning issues, so it doesn't feel like a missed action.
 - [ ] Provide color selection before joining the game.
 - [ ] Introduce special apple effects (e.g. ethernal, bullet time, mass slow, mass haste, etc.).
