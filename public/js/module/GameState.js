@@ -50,7 +50,7 @@ export class GameState {
 
     deleteProperties(target, diffObj) {
         Object.keys(diffObj).forEach(key => {
-            const value = diff.deleted[key];
+            const value = diffObj[key];
             if (typeof value === 'object' && value !== null) {
                 this.deleteProperties(target[key], value);
             } else {

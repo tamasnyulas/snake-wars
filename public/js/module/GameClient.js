@@ -9,27 +9,38 @@ export const GameClient = {
     usernameInput: document.querySelector("input[name='username']"),
     btnReadyCheck: document.querySelector(".readyCheck"),
     scoreDisplay: document.querySelector(".scoreDisplay"),
-    touchControlPanel: document.querySelector(".touchControlPanel"),
     isTouchScreen: 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0,
-    grid: null,
-    apple: null,
+    //grid: null,
     socket: null,
     settings: null,
     state: new GameState(),
     snakeUnit: 20,
+    touchControlPanel: document.querySelector(".touchControlPanel"),
+    canvasContainer: document.querySelector(".canvasContainer"),
+    /*canvas: document.querySelector("#gameCanvas"),
+    appleCanvas: document.querySelector("#appleCanvas"),
+    canvasContext: null,
+    appleCanvasContext: null,*/
 
     initialize: function (socket) {
         this.socket = socket;
+        //this.canvasContext = this.canvas.getContext("2d");
+        //this.appleCanvasContext = this.appleCanvas.getContext("2d");
 
         // Set up client event listeners
         socket.on('connected', (response) => {
             console.log('connected', response);
             this.settings = response.settings;
-            Snake.initialize(this.settings.columns);
+            Snake.initialize(this.settings.columns, this.settings.columns * this.snakeUnit, this.settings.rows * this.snakeUnit, this.canvasContainer);
+            Apple.initiCanvas(this.settings.columns * this.snakeUnit, this.settings.rows * this.snakeUnit, this.canvasContainer);
+
+            /*this.canvas.width = this.settings.columns * this.snakeUnit;
+            this.canvas.height = this.settings.rows * this.snakeUnit;
+            this.appleCanvas.width = this.settings.columns * this.snakeUnit;
+            this.appleCanvas.height = this.settings.rows * this.snakeUnit;*/
 
             this.createBoard();
             this.syncState(response.state);
-            this.syncGame();
 
             // MVP
             this.checkJoin();
@@ -47,13 +58,11 @@ export const GameClient = {
             console.log('The game is starting');
             this.createBoard();
             this.syncState(state);
-            this.syncGame();
         });
 
         socket.on('end-game', (state) => {
             console.log('The game is ending');
             this.syncState(state);
-            this.syncGame();
             this.endGame();
         });
 
@@ -120,21 +129,23 @@ export const GameClient = {
 
     // TODO: There's a glitch regarding the snake tail rendering on the initial position
     createBoard: function () {
-        this.board.innerHTML = "";
+        /*this.board.innerHTML = "";
         this.board.style.width = this.settings.columns * this.snakeUnit;
-        this.board.style.height = this.settings.rows * this.snakeUnit;
+        this.board.style.height = this.settings.rows * this.snakeUnit;*/
+        this.canvasContainer.style.width = this.settings.columns * this.snakeUnit;
+        this.canvasContainer.style.height = this.settings.rows * this.snakeUnit;
 
         this.joinGameForm.style.display = "none";
         this.btnReadyCheck.style.display = "none";
 
-        for (let i = 0; i < this.settings.columns * this.settings.rows; i++) {
+        /*for (let i = 0; i < this.settings.columns * this.settings.rows; i++) {
             let div = document.createElement("div");
             div.classList.add("grid");
             div.style.width = this.snakeUnit;
             div.style.height = this.snakeUnit;
             this.board.appendChild(div);
         }
-        this.grid = document.querySelectorAll(".grid");
+        this.grid = document.querySelectorAll(".grid");*/
     },
 
     syncState: function (state) {
@@ -150,12 +161,13 @@ export const GameClient = {
     },
 
     syncGame: function () {
-        Object.values(this.state.snakes).forEach(snake => {
-            Snake.render(snake, this.grid);
-        });
+        
+        for (const [id, snakeState] of Object.entries(this.state.snakes)) {
+            Snake.render(snakeState, id, this.settings.columns);
+        };
 
         if (this.state.apple) {
-            this.apple = Apple.renderApple(this.state.apple, this.grid);
+            Apple.renderApple(this.state.apple, this.settings.columns);
         }
 
         this.refreshScore(false);
