@@ -94,18 +94,35 @@ export const GameClient = {
             this.usernameInput.reportValidity();
             return;
         } 
-        
-        this.socket.emit('join-game', {
-            username: this.usernameInput.value,
-        });
 
-        this.joinGameForm.style.display = "none";
-        this.btnReadyCheck.style.display = "inline-block";
-        this.btnReadyCheck.focus();
+        const preferences = {
+            username: this.usernameInput.value,
+        };
         
-        if (this.isTouchScreen) {
-            this.touchControlPanel.style.display = "block";
-        }
+        const joinPromise = (async (preferences) => {
+            console.log('joining game', preferences);
+            return await this.socket.emitWithAck('join-game', preferences);
+        })(preferences);
+
+        joinPromise.then(response => {
+            if (response.isSuccess === false) {
+                console.log('Join failed:', response.error);
+                return;
+            }
+
+            // Handle successful response
+            this.joinGameForm.style.display = "none";
+            this.btnReadyCheck.style.display = "inline-block";
+            this.btnReadyCheck.focus();
+            
+            if (this.isTouchScreen) {
+                this.touchControlPanel.style.display = "block";
+            }
+        })
+        .catch(error => {
+            // Handle error
+            console.error('Join error:', error);
+        });
     },
 
     readyCheck: function () {

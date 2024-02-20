@@ -2,11 +2,11 @@
 
 - [x] As the first step, a user should be able to create a game (handling multiple games is optional).
 - [x] A user should be able to set the game settings through a form.
-- [ ] When a game is created, it should have a unique, sharable URL.
+- [x] When a game is created, it should have a unique, sharable URL.
 - [x] The game should initialize based on the settings when it's created.
 - [ ] Handle different log levels for development and production.
 - [ ] Refactor and clean up the code based on best practices.
-- [ ] List the available games on the lobby page.
+- [x] List the available games on the lobby page.
 - [x] Sync data should only contain what changed, instead of pushing everything.
 - [ ] Fix quick turning issues, so it doesn't feel like a missed action.
 - [ ] Provide color selection before joining the game.
@@ -22,7 +22,7 @@
 - [x] Show the winner of the game.
 - [ ] Extract game settings and game control mechanics (join, ready) into a separate module.
 - [x] Introduce game creation and game settings.
-- [ ] Use HTML5 transitions to smooth out snake movement.
+- [ ] Smooth out snake movement.
 - [ ] Make the UI nicer.
 - [ ] Add loading indicator to handle laggy actions.
 - [ ] Fix rendering of the initial snake tail.
@@ -32,6 +32,8 @@
  # Server side TODOs:
 
 - [ ] Add validation for the submitted game settings.
+- [ ] User session ID instead of socket id (because it's generated on every connect, disconnect, page reload, etc.)
+- [ ] Calculate initial snake positions dynamically.
 - [ ] Manage multiple games based on the unique game ID.
 - [x] An iteration should first calculate crashes for all snakes, and only after that move them (in two separate loops).
 - [ ] Ensure that `GameServer.gameEventLoop()` works highly efficiently with top performance.

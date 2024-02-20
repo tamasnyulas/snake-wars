@@ -11,6 +11,9 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 const __rootdir = path.resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const io = new Server(httpServer);
+
+GameServer.initialize(io);
 
 // Set "public" directory as the root for public resources
 app.use(express.static(join(__rootdir, '/public'))); // TODO: this doesn't seem to work when it comes to html file references
@@ -25,36 +28,10 @@ app.get('/', (req, res) => {
 app.post('/new-game', (req, res) => {
     const formData = req.body || {}; // Assuming form data is available in req.body
 
-    // Encode and encrypt the form data
-    const encodedData = Buffer.from(JSON.stringify(formData)).toString('base64');
-    const encryptedData = Buffer.from(encodedData).toString('base64');
-
-    // Generate a random string for uniqueness
-    const randomString = generateRandomString(8);
-
-    // Combine the random string and the encrypted data as the gameId
-    const gameId = randomString + encryptedData;
-
-    res.redirect('/play/' + gameId);
-});
-
-// GameServer initialization when a certain game's URL is requested
-app.get('/play/:gameId', (req, res) => {
-    const gameId = req.params.gameId;
-    const io = new Server(httpServer);
-
-    // Extract the encrypted data from the gameId
-    const encryptedData = gameId.substring(8);
-
-    // Decrypt and decode the data
-    try {    
-        const decryptedData = Buffer.from(encryptedData, 'base64').toString('utf-8');
-        const decodedData = Buffer.from(decryptedData, 'base64').toString('utf-8');
-        const formData = JSON.parse(decodedData);
-
-        GameServer.initialize(io, formData);
-
-        res.sendFile(join(__rootdir, 'public/game.html'));
+    try {
+        const gameId = GameServer.createGameId(formData);
+        GameServer.initializeGameRoom(gameId);
+        res.redirect('/play?gameId=' + gameId);
     } catch (error) {
         // TODO: send some error message to the client
         console.error('Error:', error);
@@ -62,17 +39,33 @@ app.get('/play/:gameId', (req, res) => {
     }
 });
 
+// GameServer initialization when a certain game's URL is requested
+app.get('/play', (req, res) => {
+    const gameId = req.query.gameId;
+
+    if (GameServer.visitGameRoom(gameId)) {
+        res.sendFile(join(__rootdir, 'public/game.html'));
+    } else {
+        res.redirect('/');
+    }
+});
+
+app.get('/api/list-games', (req, res) => {
+    let games = [];
+    for (const gameId in GameServer.gameRooms) {
+        const gameRoom = GameServer.gameRooms[gameId];
+        // TODO: add name name and additional info if needed.
+        games.push({
+            link: '/play?gameId=' + gameId,
+            settings: gameRoom.settings,
+            players: gameRoom.getPlayerCount(),
+        });
+    }
+
+    res.json(games);
+});
+
 // Start the server
 httpServer.listen(process.env.SERVER_PORT, () => {
     console.log('server running at http://localhost:' + process.env.SERVER_PORT);
 });
-
-// TODO: move this function
-function generateRandomString(length) {
-    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let randomString = '';
-    for (let i = 0; i < length; i++) {
-        randomString += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return randomString;
-}

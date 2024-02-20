@@ -63,6 +63,7 @@ export const Snake = {
         return snakeInstance;
     },
 
+    // TODO: when the game is over, the snakes are still animated for their last moves on state synchronization. This should be fixed.
     render: function (snakeState, id, gridSize) {
         if (!snakeState.canMove) return;
 

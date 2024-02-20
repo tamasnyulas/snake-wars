@@ -1,7 +1,8 @@
 import { detailedDiff } from 'deep-object-diff';
 import { GameState } from '../../public/js/module/GameState.js';
 
-export class ServerGameState extends GameState{
+export class ServerGameState extends GameState
+{
     #previousState;
 
     reset() {
