@@ -1,0 +1,74 @@
+<html>
+<head>
+    <title>Snake Wars</title>
+
+    <link rel="stylesheet" type="text/css" href="/style/general.css">
+    <link rel="stylesheet" type="text/css" href="/style/lobby.css">
+</head>
+
+<body>
+    <h1>Snake Wars</h1>
+
+    <div class="lobby">
+
+        <div class="lobbyLeft">
+            <h3>Join Game</h3>
+            <p>Available games:</p>
+            <div class="gameList">
+                <% if (games.length > 0) { %>
+                    <ul>
+                        <% games.forEach((game, i) => { %>
+                            <li>
+                                <a href="<%= game.link %>">
+                                    Game <%= i+1 %>: Free For All, players: <%= game.players %>/<%= game.settings.players %>, map: <%= game.settings.columns %>x<%= game.settings.rows %>
+                                </a>
+                            </li>
+                        <% }) %>
+                    </ul>
+                <% } else { %>
+                    <p>No games available</p>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="lobbyCenter">OR</div>
+
+        <div class="lobbyRight">
+            <h3>Create New Game</h3>
+            <% if (canCreateGame) { %>
+                <p>Settings:</p>
+                <form class="settingsForm" method="POST" action="/new-game">
+                    <div class="row">
+                        <label for="rows">Players:</label>
+                        <input type="number" id="players" name="players" min="1" max="3" value="1"/>
+                    </div>
+
+                    <div class="row">
+                        <label for="rows">End early on crash:</label>
+                        <input type="checkbox" id="endEarly" name="endEarly" checked />
+                    </div>
+
+                    <div class="row">
+                        <label for="speedIncrement">Interval multiplier:</label>
+                        <input type="number" id="speedIncrement" name="speedIncrement" min="0" max="1" step="0.1" value="0.8"/>
+                    </div>
+
+                    <div class="row">
+                        <label for="columns">Columns:</label>
+                        <input type="number" id="columns" name="columns" min="5" max="99" size="2" value="20"/>
+                    </div>
+
+                    <div class="row">
+                        <label for="rows">Rows:</label>
+                        <input type="number" id="rows" name="rows" min="5" max="99" value="20"/>
+                    </div>
+
+                    <div class="row"><button type="submit">Apply</button></div>
+                </form>
+            <% } else { %>
+                <p>The maximum number of game rooms has been reached. Please try again later.</p>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

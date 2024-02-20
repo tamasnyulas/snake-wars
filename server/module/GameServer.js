@@ -3,6 +3,7 @@ import { GameRoom } from './GameRoom.js';
 export const GameServer = {
     io: null,
     gameRooms: {},
+    maxGameRooms: process.env.MAX_GAME_ROOMS || 10,
 
     initialize: function (io) {
         this.io = io; // TODO: do I really need it here, or can I pass it for the rooms directly???
@@ -66,5 +67,25 @@ export const GameServer = {
             delete this.gameRooms[gameId];
             console.log('the game room is deleted');
         }
-    }
+    },
+
+    getGameList: function () {
+        let games = [];
+        
+        for (const gameId in GameServer.gameRooms) {
+            const gameRoom = GameServer.gameRooms[gameId];
+            // TODO: add name name and additional info if needed.
+            games.push({
+                link: '/play?gameId=' + gameId,
+                settings: gameRoom.settings,
+                players: gameRoom.getPlayerCount(),
+            });
+        }
+
+        return games;
+    },
+
+    canCreateGame: function () {
+        return Object.keys(this.gameRooms).length < this.maxGameRooms;
+    },
 };
