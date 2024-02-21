@@ -5,7 +5,7 @@ import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { Server } from 'socket.io';
-import { GameServer } from './module/GameServer.js';
+import { GameServer } from './server/GameServer.js';
 
 dotenv.config();
 const app = express();

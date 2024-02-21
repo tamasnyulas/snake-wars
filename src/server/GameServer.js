@@ -1,4 +1,4 @@
-import { GameRoom } from './GameRoom.js';
+import { GameRoom } from '../game/GameRoom.js';
 
 export const GameServer = {
     io: null,

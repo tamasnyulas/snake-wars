@@ -1,5 +1,5 @@
 import { detailedDiff } from 'deep-object-diff';
-import { GameState } from '../../public/js/module/GameState.js';
+import { GameState } from '../client/GameState.js';
 
 export class ServerGameState extends GameState
 {

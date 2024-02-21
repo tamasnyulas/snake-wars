@@ -1,4 +1,4 @@
-import { GameClient } from './module/GameClient.js';
+import { GameClient } from './GameClient.js';
 
 // Event listeners
 document.addEventListener("DOMContentLoaded", function () {
