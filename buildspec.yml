@@ -3,6 +3,9 @@ artifacts:
   files:
     - '**/*'
 phases:
+  install:
+    commands:
+      - npm install
   build:
     commands:
       - npm run build
