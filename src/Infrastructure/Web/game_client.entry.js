@@ -1,4 +1,4 @@
-import { GameClient } from './GameClient.js';
+import GameClient from '/src/Application/Client/GameClient.js'; // TODO: FIXME
 
 // Event listeners
 document.addEventListener("DOMContentLoaded", function () {

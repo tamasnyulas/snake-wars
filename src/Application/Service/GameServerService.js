@@ -1,10 +1,16 @@
-import { GameRoom } from '../game/GameRoom.js';
+/**
+ * TODO:
+ * - Responsible for orchestrating users and game rooms.
+ */
 
-export const GameServer = {
+import GameRoomService from './GameRoomService.js';
+
+const GameServerService = {
     io: null,
     gameRooms: {},
     maxGameRooms: process.env.MAX_GAME_ROOMS || 10,
 
+    // TODO: replace io with an interface and keep it out from the application and domain layers
     initialize: function (io) {
         this.io = io; // TODO: do I really need it here, or can I pass it for the rooms directly???
 
@@ -41,7 +47,7 @@ export const GameServer = {
         const decodedData = Buffer.from(decryptedData, 'base64').toString('utf-8');
         const settings = JSON.parse(decodedData);
 
-        this.gameRooms[gameId] = new GameRoom(this.io, gameId, settings);
+        this.gameRooms[gameId] = new GameRoomService(this.io, gameId, settings);
     },
 
     visitGameRoom: function (gameId) {
@@ -72,11 +78,11 @@ export const GameServer = {
     getGameList: function () {
         let games = [];
         
-        for (const gameId in GameServer.gameRooms) {
-            const gameRoom = GameServer.gameRooms[gameId];
+        for (const gameId in this.gameRooms) {
+            const gameRoom = this.gameRooms[gameId];
             // TODO: add name name and additional info if needed.
             games.push({
-                link: '/play?gameId=' + gameId,
+                link: '/game/play?gameId=' + gameId,
                 settings: gameRoom.settings,
                 players: gameRoom.getPlayerCount(),
             });
@@ -89,3 +95,5 @@ export const GameServer = {
         return Object.keys(this.gameRooms).length < this.maxGameRooms;
     },
 };
+
+export default GameServerService;

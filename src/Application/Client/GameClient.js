@@ -1,8 +1,22 @@
-import { Snake } from './Snake.js';
-import { Apple } from './Apple.js';
-import { GameState } from './GameState.js';
+import { Snake } from './Presentation/Snake.js';
+import { Apple } from './Presentation/Apple.js';
+import GameState from '../../Domain/Entity/GameState.js';
 
-export const GameClient = {
+/**
+ * GameClient responsibilities: 
+ * - Initialize the game client
+ * - Set up client event listeners
+ * - Handle user input
+ * - Sync the game state
+ * - End the game
+ * - Refresh the score
+ * - Determine the top score
+ * - Check if a user can join the game
+ * - Join the game
+ * - Handle ready check
+ * - Create the game board
+ */
+const GameClient = {
     canvasContainer: document.querySelector(".canvasContainer"),
     touchControlPanel: document.querySelector(".touchControlPanel"),
     popup: document.querySelector(".popup"),
@@ -206,3 +220,5 @@ export const GameClient = {
     },
 
 };
+
+export default GameClient;

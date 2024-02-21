@@ -1,4 +1,4 @@
-export const Snake = {
+const Player = {
 
     createSnake: function (options = {}) {
         const defaultOptions = {
@@ -98,3 +98,5 @@ export const Snake = {
         return snakeInstance;
     },
 };
+
+export default Player;

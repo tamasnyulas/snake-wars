@@ -1,4 +1,4 @@
-export const Apple = {
+const Collectible = {
     maxValue: 5,
 
     createApple: function (grid) {
@@ -25,3 +25,5 @@ export const Apple = {
         return emptySquares[randomIndex];
     },
 };
+
+export default Collectible;

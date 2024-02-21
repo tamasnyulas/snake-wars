@@ -1,7 +1,7 @@
 import { detailedDiff } from 'deep-object-diff';
-import { GameState } from '../client/GameState.js';
+import GameState from './GameState.js';
 
-export class ServerGameState extends GameState
+export default class ServerGameState extends GameState // TODO: consider renaming this class to make it decoupled from Server domain
 {
     #previousState;
 

@@ -1,12 +1,11 @@
 {
   "name": "snake-wars",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Snake Wars multiplayer game",
-  "main": "server.js",
+  "main": "src/Infrastructure/Web/server.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "start": "node src/Infrastructure/Web/server.js",
     "build": "webpack --config webpack.config.cjs",
     "watch": "webpack  --watch --config webpack.config.cjs"
   },
@@ -18,11 +17,14 @@
     "socket.io": "^4.7.4"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4"
   },
-  "jest": {
-    "transform": {}
+  "_moduleAliases": {
+    "@root": ".",
+    "@src": "src",
+    "@app": "src/Application",
+    "@domain": "src/Domain",
+    "@infra": "src/Infrastructure"
   }
 }

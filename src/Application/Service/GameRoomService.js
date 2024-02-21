@@ -1,8 +1,17 @@
-import { Snake } from './Snake.js';
-import { Apple } from './Apple.js';
-import { ServerGameState } from './ServerGameState.js';
+/**
+ * TODO:
+ * - Responsible for managing game a single room.
+ * - Handles user events (connect, disconnect, join game, ready check, snake control) and delegates to the appropriate domain logic.
+ * - Emits game events (start, stop) and state to the connected users. (???)
+ * - Manages the game state and the game loop. (???)
+ */
 
-export class GameRoom {
+import Player from '../../Domain/Entity/Player.js';
+import Collectible from '../../Domain/Entity/Collectible.js';
+import ServerGameState from '../../Domain/Entity/ServerGameState.js';
+
+// should a service be a class?
+export default class GameRoomService {
     io = null;
     gameId = null;
     state = new ServerGameState();
@@ -151,7 +160,7 @@ export class GameRoom {
     }
 
     createSnake(socket, preferences) {
-        this.state.snakes[socket.id] = Snake.createSnake({
+        this.state.snakes[socket.id] = Player.createSnake({
             ...this.players[Object.keys(this.state.snakes).length], // TODO: calculate player initial position dynamically
             id: socket.id,
             username: preferences.username,
@@ -177,7 +186,7 @@ export class GameRoom {
             });
         });
 
-        this.state.apple = Apple.createApple(this.state.grid);
+        this.state.apple = Collectible.createApple(this.state.grid);
         this.state.intervalTime = 200;
         this.state.activePlayers = Object.keys(this.state.snakes).length;
 
@@ -239,7 +248,7 @@ export class GameRoom {
             this.increaseSpeed();
         }
 
-        this.state.apple = Apple.createApple(this.state.grid);
+        this.state.apple = Collectible.createApple(this.state.grid);
     }
 
     increaseSpeed() {

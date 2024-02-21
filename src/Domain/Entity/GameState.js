@@ -1,4 +1,4 @@
-export class GameState {
+export default class GameState {
     static STATE_NAME = {
         WAITING: 'waiting',
         PLAYING: 'playing',
