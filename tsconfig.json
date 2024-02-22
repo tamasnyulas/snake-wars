@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+      "target": "es6",
+      "module": "nodenext",
+      "strict": true,
+      "esModuleInterop": true,
+      "outDir": "dist",
+      "sourceMap": true,
+      "baseUrl": ".",
+      "paths": {
+        "@app/*": ["src/Application/*"],
+        "@domain/*": ["src/Domain/*"],
+        "@infra/*": ["src/Infrastructure/*"]
+      },
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules"]
+  }

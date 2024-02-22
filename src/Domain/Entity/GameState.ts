@@ -4,6 +4,14 @@ export default class GameState {
         PLAYING: 'playing',
     };
 
+    // TODO: fix types
+    snakes: any;
+    stateName: any;
+    apple: any;
+    activePlayers: any;
+    grid: any;
+    intervalTime: any;
+
     constructor(stateValues = {}) {
         // TODO: consider moving player metadata to a separate place and only keep snake position related info
         this.snakes = stateValues.snakes || {};
@@ -23,7 +31,7 @@ export default class GameState {
         this.intervalTime = 0;
     }
 
-    mergeDiff(diff) {
+    mergeDiff(diff: object) {
         this.traverseAndSet(this, diff.added);
         this.traverseAndSet(this, diff.updated);
         this.deleteProperties(this, diff.deleted);

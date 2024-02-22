@@ -1,4 +1,5 @@
-import GameClient from '/src/Application/Client/GameClient.js'; // TODO: FIXME
+import { io } from "socket.io-client";
+import GameClient from '@app/Client/GameClient';
 
 // Event listeners
 document.addEventListener("DOMContentLoaded", function () {

@@ -1,6 +1,6 @@
-import { Snake } from './Presentation/Snake.js';
-import { Apple } from './Presentation/Apple.js';
-import GameState from '../../Domain/Entity/GameState.js';
+import { Snake } from './Presentation/Snake';
+import { Apple } from './Presentation/Apple';
+import GameState from '@domain/Entity/GameState';
 
 /**
  * GameClient responsibilities: 

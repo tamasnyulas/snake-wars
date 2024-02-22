@@ -2,29 +2,30 @@
  * TODO:
  * - Responsible for orchestrating users and game rooms.
  */
+import { Service } from 'typedi';
+import { Server, Socket } from 'socket.io';
+import GameRoomService from './GameRoomService';
 
-import GameRoomService from './GameRoomService.js';
-
-const GameServerService = {
-    io: null,
-    gameRooms: {},
-    maxGameRooms: process.env.MAX_GAME_ROOMS || 10,
+export default class GameServerService {
+    protected io: Server | null = null;
+    protected gameRooms: { [gameId: string]: GameRoomService } = {};
+    protected maxGameRooms: number = parseInt(process.env.MAX_GAME_ROOM || '10');
 
     // TODO: replace io with an interface and keep it out from the application and domain layers
-    initialize: function (io) {
-        this.io = io; // TODO: do I really need it here, or can I pass it for the rooms directly???
-
+    constructor (io: Server) {
+        this.io = io;
+        
         // Listen for incoming socket.io connections (should happen only when joining a game room)
-        this.io.on('connection', (socket) => this.onConnectUser(socket));
-    },
+        this.io.on('connection', this.onConnectUser.bind(this));
+    }
 
-    createGameId: function (formData) {
+    createGameId (formData: object): string {
         const encodedData = Buffer.from(JSON.stringify(formData)).toString('base64');
         const encryptedData = Buffer.from(encodedData).toString('base64');
         const randomString = generateRandomString(8);
 
         // TODO: move this out of here
-        function generateRandomString(length) {
+        function generateRandomString(length: number) {
             const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let randomString = '';
             for (let i = 0; i < length; i++) {
@@ -34,9 +35,9 @@ const GameServerService = {
         }
 
         return randomString + encryptedData;
-    }, 
+    }
 
-    initializeGameRoom: function (gameId) {
+    initializeGameRoom (gameId: string): void {
         if (this.gameRooms[gameId]) {
             throw new Error('Game room already initialized.');
         }
@@ -48,14 +49,14 @@ const GameServerService = {
         const settings = JSON.parse(decodedData);
 
         this.gameRooms[gameId] = new GameRoomService(this.io, gameId, settings);
-    },
+    }
 
-    visitGameRoom: function (gameId) {
+    visitGameRoom (gameId: string): boolean {
         return !!this.gameRooms[gameId];
-    }, 
+    }
 
-    onConnectUser: function (socket) {
-        const gameId = socket.handshake.query.gameId;
+    onConnectUser (socket: Socket): void {
+        const gameId = socket.handshake.query.gameId?.toString() || '';
 
         if (!this.gameRooms[gameId]) {
             socket.disconnect()
@@ -65,17 +66,17 @@ const GameServerService = {
         this.gameRooms[gameId].connectUser(socket);
 
         socket.on('disconnect', () => this.onDisconnectUser(gameId));
-    },
+    }
 
-    onDisconnectUser: function (gameId) {
+    onDisconnectUser (gameId: string) {
         console.log('a user is disconnected, checking for remaining users in the room');
         if (this.gameRooms[gameId] && this.gameRooms[gameId].getPlayerCount() < 1) { // TODO: check the connected user count instead of joined player count
             delete this.gameRooms[gameId];
             console.log('the game room is deleted');
         }
-    },
+    }
 
-    getGameList: function () {
+    getGameList (): object[] { // TODO: define GameList type (or similar)
         let games = [];
         
         for (const gameId in this.gameRooms) {
@@ -89,11 +90,9 @@ const GameServerService = {
         }
 
         return games;
-    },
+    }
 
-    canCreateGame: function () {
+    canCreateGame (): boolean {
         return Object.keys(this.gameRooms).length < this.maxGameRooms;
-    },
+    }
 };
-
-export default GameServerService;

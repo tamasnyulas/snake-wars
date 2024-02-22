@@ -6,9 +6,9 @@
  * - Manages the game state and the game loop. (???)
  */
 
-import Player from '../../Domain/Entity/Player.js';
-import Collectible from '../../Domain/Entity/Collectible.js';
-import ServerGameState from '../../Domain/Entity/ServerGameState.js';
+import Player from '@domain/Entity/Player';
+import Collectible from '@domain/Entity/Collectible';
+import ServerGameState from '@domain/Entity/ServerGameState';
 
 // should a service be a class?
 export default class GameRoomService {
