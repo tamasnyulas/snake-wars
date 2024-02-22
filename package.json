@@ -5,7 +5,7 @@
   "main": "dist/Infrastructure/Web/server.js",
   "scripts": {
     "start": "ts-node --transpile-only -r tsconfig-paths/register src/Infrastructure/Web/server.ts",
-    "build": "webpack --config webpack.config.ts",
+    "build": "tsc && webpack --config webpack.config.ts",
     "watch": "webpack --watch --config webpack.config.ts"
   },
   "dependencies": {

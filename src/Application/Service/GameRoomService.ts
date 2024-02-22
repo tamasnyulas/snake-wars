@@ -6,25 +6,27 @@
  * - Manages the game state and the game loop. (???)
  */
 
+import { Server, Socket } from 'socket.io';
+import { DefaultEventsMap } from 'node_modules/socket.io/dist/typed-events';
 import Player from '@domain/Entity/Player';
 import Collectible from '@domain/Entity/Collectible';
 import ServerGameState from '@domain/Entity/ServerGameState';
 
 // should a service be a class?
 export default class GameRoomService {
-    io = null;
-    gameId = null;
-    state = new ServerGameState();
-    settings = {
+    io: Server;
+    gameId: string;
+    state: ServerGameState = new ServerGameState();
+    settings: any = { // TODO: define a type for this
         speedIncrement: 0.8,
         columns: 20,
         rows: 20,
         players: 1,
         endEarly: true,
     };
-    interval = null;
-    minInterval = 50;
-    players = [
+    interval: any = null;
+    minInterval: number = 50;
+    players: object[] = [
         { // player 1
             initialPosition: [17, 18, 19], // TODO: calculate initial position based on rows and columns
             initialDirection: -1,
@@ -39,7 +41,7 @@ export default class GameRoomService {
         },
     ];
 
-    constructor(io, gameId, settings) {
+    constructor(io: Server, gameId: string, settings: object) {
         this.io = io;
         this.gameId = gameId;
         this.settings = settings;
@@ -47,7 +49,7 @@ export default class GameRoomService {
         this.updateSettings(settings);
     }
 
-    updateSettings(settings) {
+    updateSettings(settings: any) {
         this.settings.speedIncrement = parseFloat(settings.speedIncrement);
         this.settings.columns = parseInt(settings.columns);
         this.settings.rows = parseInt(settings.rows);
@@ -55,27 +57,26 @@ export default class GameRoomService {
         this.settings.endEarly = settings.endEarly ? true : false;
     }
 
-    connectUser(socket) {
+    connectUser(socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
         console.log('a new user is connecting to a game room', socket.id, this.gameId);
 
         socket.join(this.gameId);
 
-        // set up server event listeners
-        socket.onAny((eventName, ...args) => {
-            //console.log('Socket event:', eventName, 'Arguments:', ...args);
+        socket.on('disconnect', () => this.onDisconnectUser(socket));
+
+        // set up custom server event listeners
+        socket.onAny((eventName: any, ...args: any[]) => {
+            console.log('Socket event:', eventName, 'Arguments:', ...args);
 
             switch (eventName) {
                 case 'join-game':
-                    this.onJoinGame(socket, ...args);
-                    break;
-                case 'disconnect':
-                    this.onDisconnectUser(socket, ...args);
+                    this.onJoinGame(socket, args[0], args[1]);
                     break;
                 case 'ready-check':
-                    this.onReadyCheck(socket, ...args);
+                    this.onReadyCheck(socket, args[0]);
                     break;
                 case 'snake-control':
-                    this.onSnakeControl(socket, ...args);
+                    this.onSnakeControl(socket, args[0]);
                     break;
             }
         });
@@ -86,10 +87,9 @@ export default class GameRoomService {
         });
     }
 
-    onJoinGame(socket, preferences, callback) {
+    onJoinGame(socket: Socket, preferences: any, callback: Function) {
         // return early if the game is already full
         if (Object.keys(this.state.snakes).length >= this.settings.players) {
-            //callback(false);
             return callback({
                 isSuccess: false,
                 error: 'The game is already full.',
@@ -108,7 +108,7 @@ export default class GameRoomService {
         });
     }
 
-    onDisconnectUser(socket) {
+    onDisconnectUser(socket: { id: string | number; removeAllListeners: () => void; }) {
         // return early if the user is not a player
         if (this.state.snakes[socket.id]) {
             // remove the player from the game
@@ -122,7 +122,7 @@ export default class GameRoomService {
         socket.removeAllListeners();
     }
 
-    onReadyCheck(socket, isReady) {
+    onReadyCheck(socket: { id: string | number; }, isReady: any) {
         if (!this.state.snakes[socket.id]) return;
 
         console.log('a player is ready: ', socket.id);
@@ -131,7 +131,7 @@ export default class GameRoomService {
         // start the game if all players are ready
         if (
             this.settings.players == Object.keys(this.state.snakes).length && 
-            Object.values(this.state.snakes).every(snake => snake.readyCheck)
+            Object.values(this.state.snakes).every((snake: any) => snake.readyCheck)
         ) {
             console.log('all players are ready, starting the game.');
 
@@ -141,7 +141,7 @@ export default class GameRoomService {
         }
     }
 
-    onSnakeControl(socket, msg) {
+    onSnakeControl(socket: { id: string | number; }, msg: { direction: any; }) {
         if (!this.state.snakes[socket.id]) return;
 
         const snake = this.state.snakes[socket.id];
@@ -159,7 +159,7 @@ export default class GameRoomService {
         this.io.to(this.gameId).emit('sync-state-diff', this.state.purgeDiff());
     }
 
-    createSnake(socket, preferences) {
+    createSnake(socket: { id: string | number; }, preferences: { username: any; }) {
         this.state.snakes[socket.id] = Player.createSnake({
             ...this.players[Object.keys(this.state.snakes).length], // TODO: calculate player initial position dynamically
             id: socket.id,
@@ -180,8 +180,8 @@ export default class GameRoomService {
 
         this.state.stateName = ServerGameState.STATE_NAME.PLAYING;
 
-        Object.values(this.state.snakes).forEach((snake, i) => {
-            snake.initialPosition.forEach(position => {
+        Object.values(this.state.snakes).forEach((snake: any, i) => {
+            snake.initialPosition.forEach((position: string | number) => {
                 this.state.grid[position] = i;
             });
         });
@@ -198,7 +198,7 @@ export default class GameRoomService {
     gameEventLoop() {
         let chrashed = false;
 
-        Object.values(this.state.snakes).forEach((snake, i) => {
+        Object.values(this.state.snakes).forEach((snake: any, i) => {
             if (!snake.canMove) return;
 
             if (snake.checkForHits(this.state.grid, this.settings.columns, this.settings.rows)) {
@@ -213,7 +213,7 @@ export default class GameRoomService {
             return;
         }
 
-        Object.values(this.state.snakes).forEach((snake) => {
+        Object.values(this.state.snakes).forEach((snake: any) => {
             if (!snake.canMove) return;
 
             const headIndex = snake.move();
@@ -241,7 +241,7 @@ export default class GameRoomService {
         this.io.to(this.gameId).emit('end-game', this.state);
     }
 
-    eatApple(snake) {
+    eatApple(snake: any) {
         snake.score(this.state.apple.value);
 
         if (this.state.apple.speedBomb) {
@@ -262,7 +262,7 @@ export default class GameRoomService {
     }
 
     resetSnakes() {
-        Object.values(this.state.snakes).forEach(snake => snake.reset());
+        Object.values(this.state.snakes).forEach((snake: any) => snake.reset());
     }
 
     getPlayerCount() {

@@ -1,7 +1,7 @@
 const Collectible = {
     maxValue: 5,
 
-    createApple: function (grid) {
+    createApple: function (grid: []) {
         const randomValue = Math.floor(Math.random() * this.maxValue) + 1;
         const appleInstance = {
             value: randomValue,
@@ -12,8 +12,8 @@ const Collectible = {
         return appleInstance;
     },
 
-    getRandomPosition: function (grid) {
-        const emptySquares = grid.reduce((acc, field, index) => {
+    getRandomPosition: function (grid: []) {
+        const emptySquares = grid.reduce((acc: number[], field: number, index: number) => {
             if (field === 0) {
                 acc.push(index);
             }

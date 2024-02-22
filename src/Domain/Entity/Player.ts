@@ -1,6 +1,6 @@
-const Player = {
+export default class Player {
 
-    createSnake: function (options = {}) {
+    static createSnake (options: any = {}) {
         const defaultOptions = {
             id: null,
             initialPosition: [2, 1, 0], // TODO: remove hardocded position and calculate it based on active players when the game starts
@@ -36,7 +36,7 @@ const Player = {
                 this.readyCheck = false;
             },
 
-            score: function (value) {
+            score: function (value: number) {
                 this.growth += value;
                 this.currentScore += value;
             },
@@ -64,7 +64,7 @@ const Player = {
                 return this.currentPosition[0]; // return the new head index
             },
 
-            checkForHits: function (grid, columns, rows) {
+            checkForHits: function (grid: [], columns: number, rows: number) {
                 const direction = this.newDirection || this.currentDirection;
 
                 const hitBottom = this.currentPosition[0] + columns >= columns * rows && direction === columns;
@@ -82,7 +82,7 @@ const Player = {
                 }
             },
         
-            changeDirection: function (direction, columns) {
+            changeDirection: function (direction: string, columns: number) {
                 if (direction === 'right' && this.currentDirection !== -1) {
                     this.newDirection = 1;
                 } else if (direction === 'up' && this.currentDirection !== columns) {
@@ -96,7 +96,5 @@ const Player = {
         };
 
         return snakeInstance;
-    },
-};
-
-export default Player;
+    }
+}

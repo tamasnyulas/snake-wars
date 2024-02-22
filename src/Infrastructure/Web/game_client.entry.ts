@@ -10,5 +10,6 @@ document.addEventListener("DOMContentLoaded", function () {
         query: queryParams,
     });
 
-    GameClient.initialize(socket);
+    const gameClient = new GameClient(socket);
+    gameClient.initialize();
 });

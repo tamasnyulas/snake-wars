@@ -12,7 +12,7 @@ export default class GameState {
     grid: any;
     intervalTime: any;
 
-    constructor(stateValues = {}) {
+    constructor(stateValues: any = {}) {
         // TODO: consider moving player metadata to a separate place and only keep snake position related info
         this.snakes = stateValues.snakes || {};
 
@@ -31,13 +31,13 @@ export default class GameState {
         this.intervalTime = 0;
     }
 
-    mergeDiff(diff: object) {
+    mergeDiff(diff: {added: any, updated: any, deleted: any}) {
         this.traverseAndSet(this, diff.added);
         this.traverseAndSet(this, diff.updated);
         this.deleteProperties(this, diff.deleted);
     }
 
-    traverseAndSet(obj, diffObj) {
+    traverseAndSet(obj: any, diffObj: any) {
         if (diffObj === undefined || diffObj === null) return;
 
         Object.keys(diffObj).forEach(key => {
@@ -56,7 +56,7 @@ export default class GameState {
         });
     };
 
-    deleteProperties(target, diffObj) {
+    deleteProperties(target: any, diffObj: any) {
         Object.keys(diffObj).forEach(key => {
             const value = diffObj[key];
             if (typeof value === 'object' && value !== null) {
@@ -67,7 +67,7 @@ export default class GameState {
         });
     };
 
-    deleteFromTarget(target, key) {
+    deleteFromTarget(target: any, key: any) {
         if (Array.isArray(target)) {
             target.splice(key, 1);
         } else {

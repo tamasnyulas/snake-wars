@@ -7,7 +7,7 @@ import { Server, Socket } from 'socket.io';
 import GameRoomService from './GameRoomService';
 
 export default class GameServerService {
-    protected io: Server | null = null;
+    protected io: Server;
     protected gameRooms: { [gameId: string]: GameRoomService } = {};
     protected maxGameRooms: number = parseInt(process.env.MAX_GAME_ROOM || '10');
 

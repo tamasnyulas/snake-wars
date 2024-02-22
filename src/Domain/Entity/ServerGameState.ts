@@ -3,7 +3,7 @@ import GameState from './GameState';
 
 export default class ServerGameState extends GameState // TODO: consider renaming this class to make it decoupled from Server domain
 {
-    #previousState: GameState|null = null;
+    #previousState: GameState | null = null;
 
     reset() {
         super.reset();

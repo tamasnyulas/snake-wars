@@ -1,14 +1,14 @@
-export const Apple = {
-    canvas: null,
+export default class Apple {
+    protected static canvas: any;
 
-    initialize: function (width, height, canvasContainer) {
+    static initialize (width: number | string, height : number | string, canvasContainer: any) {
         this.canvas = document.createElement('canvas');
         canvasContainer.appendChild(this.canvas);
         this.canvas.width = width;
         this.canvas.height = height;
-    },
+    }
 
-    renderApple: function (appleInstance, gridSize) {
+    static renderApple (appleInstance: any, gridSize: number) {
         const canvasContext = this.canvas.getContext('2d');
 
         canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height);
@@ -26,16 +26,16 @@ export const Apple = {
             appleInstance.color,
             appleInstance.speedBomb ? "speedBomb" : null
         );*/
-    },
+    }
 
     // TODO: move this to an abstract class and reuse it for Apple and Snake respectively
-    getCoordinatesFromIndex: function(index, gridSize) {
+    protected static getCoordinatesFromIndex(index: number, gridSize: number) {
         const x = (index % gridSize) * 20;
         const y = Math.floor(index / gridSize) * 20;
         return { x, y };
-    },
+    }
 
-    getColor: function(value) {
+    protected static getColor (value: number) {
         switch (value) {
             case 1:
                 return "rgb(0, 255, 85)";
@@ -48,5 +48,5 @@ export const Apple = {
             case 5:
                 return "rgb(255, 0, 140)";
         }
-    },
+    }
 };
