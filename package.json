@@ -5,6 +5,7 @@
   "main": "dist/Infrastructure/Web/server.js",
   "scripts": {
     "start": "ts-node --transpile-only -r tsconfig-paths/register src/Infrastructure/Web/server.ts",
+    "start:prod": "node dist/Infrastructure/Web/server.js",
     "build": "tsc && webpack --config webpack.config.ts",
     "watch": "webpack --watch --config webpack.config.ts"
   },
@@ -13,6 +14,7 @@
     "dotenv": "^16.4.4",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
+    "module-alias": "^2.2.3",
     "reflect-metadata": "^0.2.1",
     "socket.io": "^4.7.4",
     "socket.io-client": "^4.7.4",
@@ -26,5 +28,10 @@
     "typescript": "^5.3.3",
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4"
+  },
+  "_moduleAliases": {
+    "@app": "dist/Application",
+    "@domain": "dist/Domain",
+    "@infra": "dist/Infrastructure"
   }
 }
