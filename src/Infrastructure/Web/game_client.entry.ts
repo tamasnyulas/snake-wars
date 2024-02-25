@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
     const queryParams = Object.fromEntries(urlParams.entries());
 
+    console.log('Initiating socket connection with query params:', queryParams);
     const socket = io('/', {
         query: queryParams,
     });

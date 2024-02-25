@@ -1,3 +1,4 @@
+import PlayerState from "@domain/ValueObject/PlayerState";
 import { Socket } from "socket.io-client";
 
 export default class Snake {
@@ -64,21 +65,20 @@ export default class Snake {
         return snakeInstance;
     }
 
-    // TODO: when the game is over, the snakes are still animated for their last moves on state synchronization. This should be fixed.
-    static render (snakeState: any, id: string, gridSize: number) {
-        if (!snakeState.canMove) return;
+    static render (playerState: PlayerState, id: string, gridSize: number, ease: boolean = true) {
+        if (!playerState.canMove) return;
 
         const canvasContext = this.getCanvas(id).getContext('2d');
 
         let frame = 0;
-        let frames = 200 / 1000 * 60; // 60 frames per second, FIX the hardcoded time (200) according the game speed
+        let frames = 200 / 1000 * 60; // 60 frames per second, FIX the hardcoded time (200) according the game speed?
 
         requestAnimationFrame(animate);
 
         function animate() {
             canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height);
 
-            snakeState.currentPosition.forEach((index: number, i: number) => {
+            playerState.currentPosition.forEach((index: number, i: number) => {
                 
                 const { x: xTo, y: yTo } = getCoordinatesFromIndex(index, gridSize);
                 let params = {
@@ -88,8 +88,8 @@ export default class Snake {
                     yTo: yTo,
                 };
 
-                if (snakeState.previousPosition && snakeState.previousPosition[i] !== undefined) {
-                    const { x: xFrom, y: yFrom  } = getCoordinatesFromIndex(snakeState.previousPosition[i], gridSize);
+                if (ease && playerState.previousPosition && playerState.previousPosition[i] !== undefined) {
+                    const { x: xFrom, y: yFrom  } = getCoordinatesFromIndex(playerState.previousPosition[i], gridSize);
                     params.xFrom = xFrom;
                     params.yFrom = yFrom;
                 }
@@ -117,7 +117,7 @@ export default class Snake {
                 }*/
             });
 
-            if (frame < frames && snakeState.previousPosition.length > 0) {
+            if (ease && frame < frames && playerState.previousPosition.length > 0) {
                 frame++;
                 requestAnimationFrame(animate);
             }
@@ -155,21 +155,21 @@ export default class Snake {
         }
     }
 
-    static control (e: KeyboardEvent, snakeInstance: any, columns: number, socket: Socket) {
-        if (!snakeInstance.canMove) return;
+    static control (e: KeyboardEvent, playerState: PlayerState, columns: number, socket: Socket) {
+        if (!playerState.canMove) return;
 
-        if (e.key === this.controlKeys.right && snakeInstance.currentDirection !== -1) {
-            snakeInstance.currentDirection = 1;
-            socket.emit('snake-control', { direction: 'right' });
-        } else if (e.key === this.controlKeys.up && snakeInstance.currentDirection !== columns) {
-            snakeInstance.currentDirection = -columns;
-            socket.emit('snake-control', { direction: 'up' })
-        } else if (e.key === this.controlKeys.left && snakeInstance.currentDirection !== 1) {
-            snakeInstance.currentDirection = -1;
-            socket.emit('snake-control', { direction: 'left' });
-        } else if (e.key === this.controlKeys.down && snakeInstance.currentDirection !== -columns) {
-            snakeInstance.currentDirection = columns;
-            socket.emit('snake-control', { direction: 'down' });
+        if (e.key === this.controlKeys.right && playerState.currentDirection !== -1) {
+            playerState.currentDirection = 1;
+            socket.emit('player-control', { direction: 'right' });
+        } else if (e.key === this.controlKeys.up && playerState.currentDirection !== columns) {
+            playerState.currentDirection = -columns;
+            socket.emit('player-control', { direction: 'up' })
+        } else if (e.key === this.controlKeys.left && playerState.currentDirection !== 1) {
+            playerState.currentDirection = -1;
+            socket.emit('player-control', { direction: 'left' });
+        } else if (e.key === this.controlKeys.down && playerState.currentDirection !== -columns) {
+            playerState.currentDirection = columns;
+            socket.emit('player-control', { direction: 'down' });
         }
     }
 }

@@ -1,100 +1,101 @@
+import PlayerState from "@domain/ValueObject/PlayerState";
+
+/**
+ * Represents a player entity with properties like name, score, and current position.
+ */
 export default class Player {
+    readonly state: PlayerState;
+    readonly id: string;
+    readonly username: string;
+    readonly color: string;
 
-    static createSnake (options: any = {}) {
-        const defaultOptions = {
-            id: null,
-            initialPosition: [2, 1, 0], // TODO: remove hardocded position and calculate it based on active players when the game starts
-            initialDirection: 1,
-            readyCheck: false,
-        };
+    constructor (settings: PlayerSettings) {
+        this.state = new PlayerState();
 
-        const snakeInstance = {
-            ...defaultOptions,
-            ...options,
-            currentPosition: [...options.initialPosition],
-            currentDirection: options.initialDirection,
-            previousPosition: [...options.initialPosition],
-            previousDirection: options.initialDirection,
-            newDirection: null,
-            size: options.initialPosition.size,
-            currentScore: 0,
-            growth: 0,
-            canMove: true,
-            username: options.username ?? 'Anonymous',
-            color: options.color ?? null,
-            
-            reset: function () {
-                this.currentPosition = [...this.initialPosition];
-                this.currentDirection = this.initialDirection;
-                this.previousPosition = [...this.initialPosition];
-                this.previousDirection = this.initialDirection;
-                this.newDirection = null;
-                this.size = this.initialPosition.size;
-                this.growth = 0;
-                this.currentScore = 0;
-                this.canMove = true;
-                this.readyCheck = false;
-            },
-
-            score: function (value: number) {
-                this.growth += value;
-                this.currentScore += value;
-            },
-
-            move: function () {
-                if (this.newDirection) {
-                    this.previousDirection = this.currentDirection;
-                    this.currentDirection = this.newDirection;
-                    this.newDirection = null;
-                }
-
-                this.previousPosition = [...this.currentPosition];
-        
-                // Add new head
-                this.currentPosition.unshift(this.currentPosition[0] + this.currentDirection);
-                
-                if (this.growth > 0) {
-                    // Grow snake
-                    this.growth--;
-                } else {
-                    // Remove tail
-                    this.currentPosition.pop();
-                }
-
-                return this.currentPosition[0]; // return the new head index
-            },
-
-            checkForHits: function (grid: [], columns: number, rows: number) {
-                const direction = this.newDirection || this.currentDirection;
-
-                const hitBottom = this.currentPosition[0] + columns >= columns * rows && direction === columns;
-                const hitRight = this.currentPosition[0] % columns === columns - 1 && direction === 1;
-                const hitLeft = this.currentPosition[0] % columns === 0 && direction === -1;
-                const hitTop = this.currentPosition[0] - columns <= 0 && direction === -columns;
-                const hitSnake = grid[this.currentPosition[0] + direction] !== 0;
-
-                if (hitBottom || hitRight || hitLeft || hitTop || hitSnake) {
-                    this.canMove = false;
-
-                    return true;
-                } else {
-                    return false;
-                }
-            },
-        
-            changeDirection: function (direction: string, columns: number) {
-                if (direction === 'right' && this.currentDirection !== -1) {
-                    this.newDirection = 1;
-                } else if (direction === 'up' && this.currentDirection !== columns) {
-                    this.newDirection = -columns;
-                } else if (direction === 'left' && this.currentDirection !== 1) {
-                    this.newDirection = -1;
-                } else if (direction === 'down' && this.currentDirection !== -columns) {
-                    this.newDirection = columns;
-                }
-            },
-        };
-
-        return snakeInstance;
+        this.id = settings.id;
+        this.username = settings.username;
+        this.color = settings.color;
     }
+
+    getMetadata (): PlayerMetadata {
+        return {
+            id: this.id,
+            username: this.username,
+            color: this.color,
+        };
+    }
+    
+    resetState () {
+        this.state.reset();
+    }
+
+    score (value: number) {
+        this.state.growth += value;
+        this.state.currentScore += value;
+    }
+
+    move () {
+        if (this.state.newDirection) {
+            this.state.previousDirection = this.state.currentDirection;
+            this.state.currentDirection = this.state.newDirection;
+            this.state.newDirection = null;
+        }
+
+        this.state.previousPosition = [...this.state.currentPosition];
+
+        // Add new head
+        this.state.currentPosition.unshift(this.state.currentPosition[0] + this.state.currentDirection);
+        
+        if (this.state.growth > 0) {
+            // Grow player
+            this.state.growth--;
+        } else {
+            // Remove tail
+            this.state.currentPosition.pop();
+        }
+
+        return this.state.currentPosition[0]; // return the new head index
+    }
+
+    checkForHits (grid: number[], columns: number, rows: number) {
+        const direction = this.state.newDirection || this.state.currentDirection;
+
+        const hitBottom = this.state.currentPosition[0] + columns >= columns * rows && direction === columns;
+        const hitRight = this.state.currentPosition[0] % columns === columns - 1 && direction === 1;
+        const hitLeft = this.state.currentPosition[0] % columns === 0 && direction === -1;
+        const hitTop = this.state.currentPosition[0] - columns < 0 && direction === -columns;
+        const hitOtherPlayer = grid[this.state.currentPosition[0] + direction] !== 0;
+
+        if (hitBottom || hitRight || hitLeft || hitTop || hitOtherPlayer) {
+            this.state.canMove = false;
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    changeDirection (direction: string, columns: number) { // TODO: "columns" could go to class property when the player is initialized
+        if (direction === 'right' && this.state.currentDirection !== -1) {
+            this.state.newDirection = 1;
+        } else if (direction === 'up' && this.state.currentDirection !== columns) {
+            this.state.newDirection = -columns;
+        } else if (direction === 'left' && this.state.currentDirection !== 1) {
+            this.state.newDirection = -1;
+        } else if (direction === 'down' && this.state.currentDirection !== -columns) {
+            this.state.newDirection = columns;
+        }
+    }
+}
+
+export type PlayerSettings = {
+    id: string;
+    username: string;
+    color: string;
+}
+
+export type PlayerMetadata = {
+    id: string;
+    username: string;
+    color: string;
 }

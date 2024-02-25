@@ -1,36 +1,39 @@
 import { Container } from 'typedi';
 import express from 'express';
-import GameServerService from '@app/Service/GameServerService'; 
+import GameService from '@app/Service/GameService';
+import SocketService from '@infra/Socket/SocketService';
 
 const GameRouter = express.Router();
+const gameService = Container.get(GameService) as GameService;
 
 // Create a new game and redirect to the game's URL
 GameRouter.post('/', (req, res) => {
-    const service = Container.get(GameServerService) as GameServerService;
-
-    if (!service.canCreateGame()) {
+    if (!gameService.canCreateGame()) {
         res.redirect('/');
         return;
     }
 
     try {
-        const formData = req.body || {}; // Assuming form data is available in req.body
-        const gameId = service.createGameId(formData);
-        service.initializeGameRoom(gameId);
+        const settings = gameService.parseGameSettings(req.body);
+        const gameId = gameService.createGame(settings, (gameId, eventName, parameter) => {
+            Container.get(SocketService).emit(gameId, eventName, parameter);
+        });
+
         res.redirect('/game/play?gameId=' + gameId);
     } catch (error) {
-        // TODO: send some error message to the client
-        console.error('Error:', error);
+        console.error('Error creating game:', error);
+
         res.redirect('/');
     }
 });
 
-// GameServerService initialization when a certain game's URL is requested
 GameRouter.get('/play', (req, res) => {
-    const service = Container.get(GameServerService) as GameServerService;
     const gameId = req.query.gameId?.toString() || '';
+    const socketService = Container.get(SocketService) as SocketService;
 
-    if (service.visitGameRoom(gameId)) {
+    if (gameService.hasGame(gameId)) {
+        socketService.initConnectionListener();
+        
         res.render('game');
     } else {
         res.redirect('/');

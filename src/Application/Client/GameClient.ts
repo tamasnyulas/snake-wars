@@ -1,7 +1,12 @@
+import 'reflect-metadata';
 import { Socket } from "socket.io-client";
 import Snake from './Presentation/Snake';
 import Apple from './Presentation/Apple';
-import GameState from '@domain/Entity/GameState';
+import { GameSettings } from "@domain/Entity/Game";
+import GameState, { GameStateName } from "@domain/ValueObject/GameState";
+import Container from "typedi";
+import GameStateDiffer from "@domain/Service/GameStateDiffer";
+import { PlayerMetadata } from "@domain/Entity/Player";
 
 /**
  * GameClient responsibilities: 
@@ -27,8 +32,9 @@ export default class GameClient {
     scoreDisplay: any = document.querySelector(".scoreDisplay");
     isTouchScreen: boolean = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     socket: Socket;
-    settings: any;
+    settings!: GameSettings;
     state: GameState = new GameState();
+    players: PlayerMetadata[] = [];
     snakeUnit: number = 20;
 
     constructor (socket: Socket) {
@@ -37,25 +43,31 @@ export default class GameClient {
 
     initialize () {
         // Set up client event listeners
-        this.socket.on('connected', (response) => {
+        this.socket.on('connected', (response: {state: GameState, settings: GameSettings, players: PlayerMetadata[]}) => {
             console.log('connected', response);
             this.settings = response.settings;
             Snake.initialize(this.settings.columns, this.settings.columns * this.snakeUnit, this.settings.rows * this.snakeUnit, this.canvasContainer);
             Apple.initialize(this.settings.columns * this.snakeUnit, this.settings.rows * this.snakeUnit, this.canvasContainer);
 
             this.createBoard();
+            this.syncPlayers(response.players);
             this.syncState(response.state);
 
             // MVP
             this.checkJoin();
         });
 
+    
         this.socket.on('disconnect', () => {
             console.log('disconnected');
             window.location.reload(); // TODO: instead of reloading the page, either don't even start rendering it or reconnect the player somehow
         });
 
-        this.socket.on('sync-state', (state) => this.syncState(state));
+        // TODO: consider renaming to "sync-game" or similar
+        this.socket.on('sync-state', (response: {state: GameState, players: PlayerMetadata[]}) => {
+            this.syncPlayers(response.players);
+            this.syncState(response.state);
+        });
 
         this.socket.on('sync-state-diff', (stateDiff) => this.syncStateDiff(stateDiff));
 
@@ -80,10 +92,10 @@ export default class GameClient {
 
         // TODO: ensure that non-players can't control the game
         document.addEventListener("keydown", (e) => {
-            if (this.state.stateName !== GameState.STATE_NAME.PLAYING) return;
+            if (this.state.stateName !== GameStateName.PLAYING) return;
 
             if (this.socket.id) {
-                Snake.control(e, this.state.snakes[this.socket.id], this.settings.columns, this.socket);
+                Snake.control(e, this.state.players[this.socket.id], this.settings.columns, this.socket);
             }
         });
 
@@ -102,7 +114,7 @@ export default class GameClient {
 
     // TODO: This should be called when a user joins or leaves the game
     checkJoin () {
-        const canJoin = (Object.keys(this.state.snakes).length < this.settings.players);
+        const canJoin = (Object.keys(this.state.players).length < this.settings.numOfPlayers);
         this.joinGameForm.style.display = canJoin ? "inline-block" : "none";
         if (canJoin) {
             this.usernameInput.focus();
@@ -162,32 +174,41 @@ export default class GameClient {
         this.btnReadyCheck.style.display = "none";
     }
 
-    syncState (state: any) {
+    syncState (state: GameState) {
         console.log('syncing new state', state);
-        this.state = new GameState(state);
+        this.state = state;
+
         this.syncGame();
+    }
+
+    syncPlayers (players: PlayerMetadata[]) {
+        console.log('syncing players', players);
+        this.players = players;
+        this.listPlayers();
     }
 
     syncStateDiff (stateDiff: any) {
         console.log('syncing new state diff', stateDiff);
-        this.state.mergeDiff(stateDiff);
+        Container.get(GameStateDiffer).mergeDiff(this.state, stateDiff);
         this.syncGame();
     }
 
     syncGame () {
-        for (const [id, snakeState] of Object.entries(this.state.snakes)) {
-            Snake.render(snakeState, id, this.settings.columns);
+        let i = 0;
+        for (const [id, playerState] of Object.entries(this.state.players)) {
+            const ease = this.state.stateName === GameStateName.PLAYING; // TODO: players should be able to turn off easing animation
+            Snake.render(playerState, id, this.settings.columns, ease);
         };
 
-        if (this.state.apple) {
-            Apple.renderApple(this.state.apple, this.settings.columns);
+        if (this.state.collectible) {
+            Apple.renderApple(this.state.collectible, this.settings.columns);
         }
 
         this.refreshScore(false);
     }
 
     endGame () {
-        if (this.socket.id && this.state.snakes[this.socket.id]) {
+        if (this.socket.id && this.state.players[this.socket.id]) {
             this.btnReadyCheck.style.display = "inline-block";
         } else {
             this.checkJoin();
@@ -196,34 +217,48 @@ export default class GameClient {
         this.refreshScore(true);
     }
 
+    listPlayers() {
+        this.scoreDisplay.innerHTML = "";
+        for (let i = 0; i < this.settings.numOfPlayers; i++) {
+            const player = this.players[i];
+            const row = document.createElement("tr");
+            if (player) {
+                row.setAttribute("id", "player-" + player.id);
+                row.style.color = player.color;
+                row.innerHTML = `<th>${encodeURIComponent(player.username)}<span class="player-state"></span></th><td class="score"></td>`;
+            } else {
+                row.innerHTML = "<th>Waiting for player...</th><td></td>";
+            }
+            this.scoreDisplay.appendChild(row);
+        }
+    }
+
     refreshScore (endGame = false) {
         let topScore = this.determineTopScore();
-        this.scoreDisplay.innerHTML = "";
+        
+        for (const [playerId, playerState] of Object.entries(this.state.players)) {
+            const row = document.getElementById("player-" + playerId)!;
 
-        Object.values(this.state.snakes).forEach((snake: any, index) => {
-            const row = document.createElement("tr");
-            row.style.color = snake.color;
-
-            if (endGame && snake.currentScore > 0 && snake.currentScore === topScore) {
+            if (endGame && playerState.currentScore > 0 && playerState.currentScore === topScore) {
                 row.classList.add("winner");
+            } else {
+                row.classList.remove("winner");
+            }
+            
+            if (this.state.stateName === GameStateName.WAITING) {
+                row.querySelector(".player-state")!.innerHTML = playerState.readyCheck ? " (ready)" : "(not ready)";
+            } else {
+                row.querySelector(".player-state")!.innerHTML = "";
             }
 
-            let username = encodeURIComponent(snake.username);
-            if (this.state.stateName === GameState.STATE_NAME.WAITING)  {
-                const readyCheck = snake.readyCheck ? " (ready)" : "";
-                username += ` ${readyCheck}`;
-            }
-
-            // TODO: add color to each name identical to their snakes
-            row.innerHTML = `<th>${username}</th><td>${snake.currentScore}</td>`;
-            this.scoreDisplay.appendChild(row);
-        });
+            row.querySelector(".score")!.innerHTML = playerState.currentScore.toString();
+        }
     }
 
     determineTopScore () {
-        let scores = Object.values(this.state.snakes).map((snake: any) => snake.currentScore);
+        let scores = Object.values(this.state.players).map((player: any) => player.currentScore);
         let topScore = Math.max(...scores);
         
-        return topScore
+        return topScore;
     }
 }

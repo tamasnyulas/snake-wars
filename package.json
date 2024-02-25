@@ -1,6 +1,6 @@
 {
   "name": "snake-wars",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Snake Wars multiplayer game",
   "main": "dist/Infrastructure/Web/server.js",
   "scripts": {
