@@ -1,17 +1,20 @@
-export const Snake = {
-    directionMap: {},
-    controlKeys: {
+import PlayerState from "@domain/ValueObject/PlayerState";
+import { Socket } from "socket.io-client";
+
+export default class Snake {
+    protected static directionMap: any;
+    protected static controlKeys: any = {
         left: 'ArrowLeft',
         up: 'ArrowUp',
         right: 'ArrowRight',
         down: 'ArrowDown',
-    },
-    canvases: {},
-    canvasWidth: null,
-    canvasHeight: null,
-    canvasContainer: null,
+    };
+    protected static canvases: any = {};
+    protected static canvasWidth: number;
+    protected static canvasHeight: number;
+    protected static canvasContainer: any;
 
-    initialize: function (columns, width, height, canvasContainer) {
+    static initialize (columns: number, width: number, height: number, canvasContainer: any) {
         this.directionMap = {
             "1": "east",
             '-1': "west",
@@ -21,9 +24,9 @@ export const Snake = {
         this.canvasWidth = width;
         this.canvasHeight = height;
         this.canvasContainer = canvasContainer;
-    },
+    }
 
-    getCanvas: function (id) {
+    protected static getCanvas (id: string) {
         if (this.canvases[id]) return this.canvases[id];
 
         this.canvases[id] = document.createElement('canvas');
@@ -32,11 +35,10 @@ export const Snake = {
         this.canvases[id].height = this.canvasHeight;
 
         return this.canvases[id];
-    },
+    }
 
-    createSnake: function (options) {
+    createSnake (options: any) {
         const snakeInstance = {
-            ...defaultOptions,
             ...options,
             currentPosition: [...options.initialPosition],
             currentDirection: options.initialDirection,
@@ -54,30 +56,29 @@ export const Snake = {
                 this.currentScore = 0;
                 this.canMove = true;
             },
-            score: function (value) {
+            score: function (value: number) {
                 this.growth += value;
                 this.currentScore += value;
             },
         };
 
         return snakeInstance;
-    },
+    }
 
-    // TODO: when the game is over, the snakes are still animated for their last moves on state synchronization. This should be fixed.
-    render: function (snakeState, id, gridSize) {
-        if (!snakeState.canMove) return;
+    static render (playerState: PlayerState, id: string, gridSize: number, ease: boolean = true) {
+        if (!playerState.canMove) return;
 
         const canvasContext = this.getCanvas(id).getContext('2d');
 
         let frame = 0;
-        let frames = 200 / 1000 * 60; // 60 frames per second, FIX the hardcoded time (200) according the game speed
+        let frames = 200 / 1000 * 60; // 60 frames per second, FIX the hardcoded time (200) according the game speed?
 
         requestAnimationFrame(animate);
 
         function animate() {
             canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height);
 
-            snakeState.currentPosition.forEach((index, i) => {
+            playerState.currentPosition.forEach((index: number, i: number) => {
                 
                 const { x: xTo, y: yTo } = getCoordinatesFromIndex(index, gridSize);
                 let params = {
@@ -87,8 +88,8 @@ export const Snake = {
                     yTo: yTo,
                 };
 
-                if (snakeState.previousPosition && snakeState.previousPosition[i] !== undefined) {
-                    const { x: xFrom, y: yFrom  } = getCoordinatesFromIndex(snakeState.previousPosition[i], gridSize);
+                if (ease && playerState.previousPosition && playerState.previousPosition[i] !== undefined) {
+                    const { x: xFrom, y: yFrom  } = getCoordinatesFromIndex(playerState.previousPosition[i], gridSize);
                     params.xFrom = xFrom;
                     params.yFrom = yFrom;
                 }
@@ -116,13 +117,13 @@ export const Snake = {
                 }*/
             });
 
-            if (frame < frames && snakeState.previousPosition.length > 0) {
+            if (ease && frame < frames && playerState.previousPosition.length > 0) {
                 frame++;
                 requestAnimationFrame(animate);
             }
         }
 
-        function drawSnakePart(params) {
+        function drawSnakePart(params: { xTo: number, xFrom: number, yTo: number, yFrom: number }) {
             let x = getX(params);
             let y = getY(params);
 
@@ -131,13 +132,13 @@ export const Snake = {
             return params;
         }
 
-        function getCoordinatesFromIndex(index, gridSize) {
+        function getCoordinatesFromIndex(index: number, gridSize: number) {
             const x = (index % gridSize) * 20;
             const y = Math.floor(index / gridSize) * 20;
             return { x, y };
         }
         
-        function getX(params) {
+        function getX(params: { xTo: number, xFrom: number }) {
             let distance = params.xTo - params.xFrom;
             let steps = frames;
             let progress = frame;
@@ -145,30 +146,30 @@ export const Snake = {
             return distance / steps * progress;
         }
 
-        function getY(params) {
+        function getY(params: { yTo: number, yFrom: number }) {
             let distance = params.yTo - params.yFrom;
             let steps = frames;
             let progress = frame;
 
             return distance / steps * progress;
         }
-    },
+    }
 
-    control: function (e, snakeInstance, columns, socket) {
-        if (!snakeInstance.canMove) return;
+    static control (e: KeyboardEvent, playerState: PlayerState, columns: number, socket: Socket) {
+        if (!playerState.canMove) return;
 
-        if (e.key === this.controlKeys.right && snakeInstance.currentDirection !== -1) {
-            snakeInstance.currentDirection = 1;
-            socket.emit('snake-control', { direction: 'right' });
-        } else if (e.key === this.controlKeys.up && snakeInstance.currentDirection !== columns) {
-            snakeInstance.currentDirection = -columns;
-            socket.emit('snake-control', { direction: 'up' })
-        } else if (e.key === this.controlKeys.left && snakeInstance.currentDirection !== 1) {
-            snakeInstance.currentDirection = -1;
-            socket.emit('snake-control', { direction: 'left' });
-        } else if (e.key === this.controlKeys.down && snakeInstance.currentDirection !== -columns) {
-            snakeInstance.currentDirection = columns;
-            socket.emit('snake-control', { direction: 'down' });
+        if (e.key === this.controlKeys.right && playerState.currentDirection !== -1) {
+            playerState.currentDirection = 1;
+            socket.emit('player-control', { direction: 'right' });
+        } else if (e.key === this.controlKeys.up && playerState.currentDirection !== columns) {
+            playerState.currentDirection = -columns;
+            socket.emit('player-control', { direction: 'up' })
+        } else if (e.key === this.controlKeys.left && playerState.currentDirection !== 1) {
+            playerState.currentDirection = -1;
+            socket.emit('player-control', { direction: 'left' });
+        } else if (e.key === this.controlKeys.down && playerState.currentDirection !== -columns) {
+            playerState.currentDirection = columns;
+            socket.emit('player-control', { direction: 'down' });
         }
-    },
-};
+    }
+}
